@@ -103,7 +103,12 @@ export default async function Home() {
         <div><a href={`mailto:${c.contact.email}`} className="btn btn-primary">メールで相談する</a></div>
       </div></section>
 
-      <footer>© {new Date().getFullYear()} {c.name} ・ {c.tagline} ・ 京田辺</footer>
+      <footer>
+        © {new Date().getFullYear()} {c.name} ・ {c.tagline} ・ 京田辺
+        <div style={{ marginTop: 10 }}>
+          <a href="/admin" style={{ color: "#c3cada", fontSize: 12, textDecoration: "underline", textUnderlineOffset: 2 }}>管理者ログイン</a>
+        </div>
+      </footer>
     </>
   );
 }
