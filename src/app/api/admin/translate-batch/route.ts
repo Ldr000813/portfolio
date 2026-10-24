@@ -12,22 +12,19 @@ export async function POST(req: NextRequest) {
   if (!key) return NextResponse.json({ error: "GEMINI_API_KEY が未設定です" }, { status: 500 });
 
   const target = req.nextUrl.searchParams.get("target") === "en" ? "en" : "zh";
+  const model = (req.nextUrl.searchParams.get("model") || "gemini-2.5-flash").replace(/["'\s]/g, "");
   const label = target === "en" ? "natural, professional English" : "简体中文 (Simplified Chinese)";
   const { texts } = await req.json();
   if (!Array.isArray(texts)) return NextResponse.json({ error: "bad_request" }, { status: 400 });
   if (texts.length === 0) return NextResponse.json({ translations: [] });
 
-  const out = await translateArray(texts.map((t) => String(t)), label, key);
-  if (!out) return NextResponse.json({ error: "translate_failed" }, { status: 502 });
-  return NextResponse.json({ translations: out });
+  const out = await translateArray(texts.map((t) => String(t)), label, key, model);
+  if (!out) return NextResponse.json({ error: "translate_failed", model }, { status: 502 });
+  return NextResponse.json({ translations: out, model });
 }
 
-async function translateArray(texts: string[], label: string, key: string): Promise<string[] | null> {
-  const clean = (s: string) => s.replace(/["'\s]/g, "");
-  const envList = (process.env.GEMINI_MODELS || "").split(",").map(clean).filter(Boolean);
-  const chain = (envList.length ? envList : [process.env.GEMINI_MODEL || "gemini-2.5-flash", "gemini-flash-latest", "gemini-3.8-flash"])
-    .filter((m, i, a) => a.indexOf(m) === i);
-
+// 1モデルだけ試す（9秒で打ち切り）。バージョンダウンはクライアント側で回す。
+async function translateArray(texts: string[], label: string, key: string, model: string): Promise<string[] | null> {
   const prompt = `Translate each element of the following JSON string array into ${label}.
 Output ONLY a JSON array of the same length and same order; each element is the translation of the corresponding input element.
 Keep unchanged: brand/tech/proper nouns (Next.js, TypeScript, React, Supabase, Vercel, Node.js, Gemini, LINE, SIED, となり/Tonari, 同志社大学, 泉北高校), URLs, and email addresses.
@@ -35,27 +32,25 @@ Natural, professional business tone.
 
 Array:
 ${JSON.stringify(texts)}`;
-
   const body = { contents: [{ role: "user", parts: [{ text: prompt }] }], generationConfig: { responseMimeType: "application/json", temperature: 0.3 } };
 
-  for (const m of chain) {
-    const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), 12000);
-    try {
-      const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${key}`, {
-        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body), signal: ctrl.signal,
-      });
-      clearTimeout(timer);
-      if (!r.ok) continue;
-      const data = await r.json();
-      const text: string = data?.candidates?.[0]?.content?.parts?.map((p: any) => p.text).join("") || "";
-      const arr = safeArr(text);
-      if (Array.isArray(arr) && arr.length === texts.length) return arr.map((x) => String(x));
-    } catch {
-      clearTimeout(timer);
-    }
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 9000);
+  try {
+    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body), signal: ctrl.signal,
+    });
+    clearTimeout(timer);
+    if (!r.ok) return null;
+    const data = await r.json();
+    const text: string = data?.candidates?.[0]?.content?.parts?.map((p: any) => p.text).join("") || "";
+    const arr = safeArr(text);
+    if (Array.isArray(arr) && arr.length === texts.length) return arr.map((x) => String(x));
+    return null;
+  } catch {
+    clearTimeout(timer);
+    return null;
   }
-  return null;
 }
 
 function safeArr(t: string): any {
