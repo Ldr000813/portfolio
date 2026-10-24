@@ -52,12 +52,17 @@ export default function Admin() {
     setBusy(true); setMsg("日本語を保存して、中文・英語に翻訳中…（10〜20秒ほど）");
     const s = await fetch(`/api/admin/content?lang=ja`, { method: "POST", headers: { "x-admin-password": pw, "Content-Type": "application/json" }, body: JSON.stringify(c) });
     if (!s.ok) { setBusy(false); setMsg("日本語の保存に失敗しました。"); return; }
-    const tr = await fetch("/api/admin/translate", { method: "POST", headers: { "x-admin-password": pw } });
-    const j = await tr.json().catch(() => ({}));
+    const hdr = { "x-admin-password": pw };
+    const [rz, re] = await Promise.all([
+      fetch("/api/admin/translate?target=zh", { method: "POST", headers: hdr }),
+      fetch("/api/admin/translate?target=en", { method: "POST", headers: hdr }),
+    ]);
     setBusy(false);
-    if (tr.ok && j.ok) setMsg("✅ 中文・英語に翻訳して保存しました");
-    else if (tr.ok) setMsg("⚠ 一部の言語で翻訳に失敗：" + (j.failed || []).join(", "));
-    else setMsg("翻訳に失敗：" + (j.error || tr.status));
+    if (rz.ok && re.ok) { setMsg("✅ 中文・英語に翻訳して保存しました"); return; }
+    const fails: string[] = [];
+    if (!rz.ok) fails.push("中文(" + rz.status + ")");
+    if (!re.ok) fails.push("英語(" + re.status + ")");
+    setMsg("⚠ 一部失敗：" + fails.join(" / ") + "。もう一度お試しください（混雑時は再実行で通ることがあります）。");
   }
 
   // helpers

@@ -5,26 +5,21 @@ import { getContent, saveContent, Content } from "@/lib/content";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
-const TARGETS: { lang: "zh" | "en"; label: string }[] = [
-  { lang: "zh", label: "简体中文 (Simplified Chinese)" },
-  { lang: "en", label: "natural, professional English" },
-];
-
-// POST: 日本語コンテンツを読み、中文・英語に自動翻訳して保存
+// POST /api/admin/translate?target=zh|en
+// 日本語コンテンツを、指定の1言語だけ翻訳して保存（分割して504を回避）
 export async function POST(req: NextRequest) {
   if (!isAdmin(req)) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   const key = process.env.GEMINI_API_KEY;
   if (!key) return NextResponse.json({ error: "GEMINI_API_KEY が未設定です" }, { status: 500 });
 
+  const target = req.nextUrl.searchParams.get("target") === "en" ? "en" : "zh";
+  const label = target === "en" ? "natural, professional English" : "简体中文 (Simplified Chinese)";
+
   const ja = await getContent("ja");
-  const done: string[] = [];
-  const failed: string[] = [];
-  for (const t of TARGETS) {
-    const tr = await translate(ja, t.label, key);
-    if (tr) { await saveContent(t.lang, tr); done.push(t.lang); }
-    else failed.push(t.lang);
-  }
-  return NextResponse.json({ ok: failed.length === 0, done, failed });
+  const tr = await translate(ja, label, key);
+  if (!tr) return NextResponse.json({ error: "translate_failed", target }, { status: 502 });
+  await saveContent(target, tr);
+  return NextResponse.json({ ok: true, target });
 }
 
 async function translate(content: Content, label: string, key: string): Promise<Content | null> {
@@ -39,7 +34,7 @@ Rules:
 - Translate ONLY human-readable text values.
 - Do NOT change: email addresses; any value starting with "http"; the arrays "stack" and "skills"; the fields "icon", "accent", "image", "photo".
 - Keep brand / tech / proper nouns as-is: Next.js, TypeScript, React, Supabase, Vercel, Node.js, Gemini, LINE, SIED, となり (Tonari), 同志社大学, 泉北高校.
-- Use a natural, professional business tone (as a freelance web engineer's portfolio).
+- Natural, professional business tone (a freelance web engineer's portfolio).
 - Output ONLY the translated JSON. No explanation, no code fences.
 
 JSON:
@@ -48,19 +43,23 @@ ${JSON.stringify(content)}`;
   const body = { contents: [{ role: "user", parts: [{ text: prompt }] }], generationConfig: { responseMimeType: "application/json", temperature: 0.3 } };
 
   for (const m of chain) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 22000); // 遅いモデルは22秒で打ち切り→次へ
     try {
       const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${key}`, {
-        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body), signal: ctrl.signal,
       });
-      if (!r.ok) continue; // 404/400/429/5xx いずれも次のモデルへ
+      clearTimeout(timer);
+      if (!r.ok) continue;
       const data = await r.json();
       const text: string = data?.candidates?.[0]?.content?.parts?.map((p: any) => p.text).join("") || "";
       const parsed = safeJson(text);
       if (parsed && parsed.hero && parsed.services && parsed.contact && parsed.profile) {
-        // 念のため、翻訳してはいけない値は日本語（原本）で上書きして保全
         return { ...parsed, contact: { ...parsed.contact, email: content.contact.email } } as Content;
       }
-    } catch { /* try next model */ }
+    } catch {
+      clearTimeout(timer); // abort や通信エラー → 次モデル
+    }
   }
   return null;
 }
