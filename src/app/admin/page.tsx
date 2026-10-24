@@ -57,27 +57,35 @@ export default function Admin() {
 
     // モデル順（先頭から順に試す＝バージョンダウン）。NEXT_PUBLIC_GEMINI_MODELS で上書き可。
     const envModels = (process.env.NEXT_PUBLIC_GEMINI_MODELS || "").split(",").map((s) => s.trim()).filter(Boolean);
-    const MODELS = envModels.length ? envModels : ["gemini-3.8-flash", "gemini-flash-latest", "gemini-3.1-pro-preview"];
+    const MODELS = envModels.length ? envModels : ["gemini-3.8-flash", "gemini-flash-latest"];
+    const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
     const targets: { code: "zh" | "en"; name: string }[] = [{ code: "zh", name: "中文" }, { code: "en", name: "英語" }];
 
     async function batchTranslate(target: string, texts: string[]): Promise<{ out?: string[]; errors: string[] }> {
       const errors: string[] = [];
       for (const model of MODELS) {
-        try {
-          const r = await fetch(`/api/admin/translate-batch?target=${target}&model=${model}`, { method: "POST", headers: jHeaders, body: JSON.stringify({ texts }) });
-          const j = await r.json().catch(() => ({}));
-          if (r.ok && Array.isArray(j.translations) && j.translations.length === texts.length) return { out: j.translations, errors };
-          errors.push(`${model}: HTTP ${r.status}${j.error ? ` ${j.error}` : ""}${j.detail ? ` — ${j.detail}` : ""}`);
-        } catch (e: any) {
-          errors.push(`${model}: network ${e?.message || "error"}`);
+        for (let attempt = 0; attempt < 2; attempt++) {
+          try {
+            const r = await fetch(`/api/admin/translate-batch?target=${target}&model=${model}`, { method: "POST", headers: jHeaders, body: JSON.stringify({ texts }) });
+            const j = await r.json().catch(() => ({}));
+            if (r.ok && Array.isArray(j.translations) && j.translations.length === texts.length) return { out: j.translations, errors };
+            const is429 = r.status === 429 || String(j.detail || "").includes("429");
+            errors.push(`${model}: HTTP ${r.status}${j.error ? ` ${j.error}` : ""}${j.detail ? ` — ${j.detail}` : ""}`);
+            if (is429 && attempt === 0) { await sleep(10000); continue; } // レート制限 → 少し待って同モデルで再試行
+            break; // 次のモデルへ
+          } catch (e: any) {
+            errors.push(`${model}: network ${e?.message || "error"}`);
+            break;
+          }
         }
       }
       return { errors };
     }
 
-    for (const tg of targets) {
+    for (let ti = 0; ti < targets.length; ti++) {
+      const tg = targets[ti];
       const { texts, apply } = extract(c);
-      const batches = chunk(texts, 15);
+      const batches = chunk(texts, 50);
       const translated: string[] = [];
       for (let i = 0; i < batches.length; i++) {
         setMsg(`${tg.name}に翻訳中…（${i + 1}/${batches.length}）`);
@@ -85,10 +93,12 @@ export default function Admin() {
         if (!res.out) {
           setBusy(false);
           console.error("[translate] " + tg.name + " batch " + (i + 1), res.errors);
-          setMsg(`${tg.name}の翻訳に失敗（バッチ${i + 1}）：` + res.errors.join(" ／ "));
+          const quota = res.errors.some((e) => e.includes("429"));
+          setMsg((quota ? "⚠ 無料枠の上限（429）に達している可能性があります。時間をおくか課金設定をご確認ください。 / " : "") + `${tg.name}の翻訳に失敗（バッチ${i + 1}）：` + res.errors.join(" ／ "));
           return;
         }
         translated.push(...res.out);
+        await sleep(2500); // レート制限対策で間隔を空ける
       }
       const translatedContent = apply(translated);
       const sv = await fetch(`/api/admin/content?lang=${tg.code}`, { method: "POST", headers: jHeaders, body: JSON.stringify(translatedContent) });

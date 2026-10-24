@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { isAdmin } from "@/lib/adminAuth";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 30;
+export const maxDuration = 60;
+const ABORT_MS = 50000;
 
 // POST /api/admin/translate-batch?target=zh|en  body: { texts: string[] }
 // 短い文字列の配列を1回で翻訳して返す（小分けにして504を回避）
@@ -35,7 +36,7 @@ ${JSON.stringify(texts)}`;
   const body = { contents: [{ role: "user", parts: [{ text: prompt }] }], generationConfig: { responseMimeType: "application/json", temperature: 0.3 } };
 
   const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), 25000);
+  const timer = setTimeout(() => ctrl.abort(), ABORT_MS);
   try {
     const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body), signal: ctrl.signal,
@@ -54,7 +55,7 @@ ${JSON.stringify(texts)}`;
     return { detail: `bad output: got ${Array.isArray(arr) ? arr.length : "non-array"} vs expected ${texts.length}. sample=${text.slice(0, 120)}` };
   } catch (e: any) {
     clearTimeout(timer);
-    return { detail: e?.name === "AbortError" ? "timeout(9s)" : `fetch error: ${e?.message || "unknown"}` };
+    return { detail: e?.name === "AbortError" ? `timeout(${ABORT_MS / 1000}s)` : `fetch error: ${e?.message || "unknown"}` };
   }
 }
 

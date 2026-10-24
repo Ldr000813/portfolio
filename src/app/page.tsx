@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { getContent, normLang } from "@/lib/content";
 import { UI } from "@/lib/ui";
-import LanguageSwitch from "@/components/LanguageSwitch";
+import SiteHeader from "@/components/SiteHeader";
 
 export const dynamic = "force-dynamic";
 
@@ -11,22 +11,7 @@ export default async function Home() {
   const t = UI[lang];
   return (
     <>
-      <header><div className="wrap nav">
-        <a className="brand" href="/profile" title={t.nav.profile}>
-          <span className="mk">{c.name.slice(0, 1)}</span>
-          <span className="brand-txt">
-            <span className="brand-name">{c.name} <span className="tg">／ {c.tagline}</span></span>
-            <span className="brand-cap">{t.brandCap}</span>
-          </span>
-        </a>
-        <nav className="nav-links">
-          <a href="/profile">{t.nav.profile}</a><a href="#services">{t.nav.services}</a><a href="#works">{t.nav.works}</a><a href="#price">{t.nav.price}</a><a href="#contact">{t.nav.contact}</a>
-        </nav>
-        <div className="nav-right">
-          <LanguageSwitch current={lang} />
-          <a href="#contact" className="btn btn-primary nav-cta">{t.nav.consult}</a>
-        </div>
-      </div></header>
+      <SiteHeader name={c.name} firstChar={c.name.slice(0, 1)} tagline={c.tagline} brandCap={t.brandCap} nav={t.nav} lang={lang} />
 
       <section className="hero"><div className="wrap">
         <div className="eyebrow">{c.hero.eyebrow}</div>
