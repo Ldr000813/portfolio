@@ -35,7 +35,7 @@ ${JSON.stringify(texts)}`;
   const body = { contents: [{ role: "user", parts: [{ text: prompt }] }], generationConfig: { responseMimeType: "application/json", temperature: 0.3 } };
 
   const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), 9000);
+  const timer = setTimeout(() => ctrl.abort(), 25000);
   try {
     const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body), signal: ctrl.signal,

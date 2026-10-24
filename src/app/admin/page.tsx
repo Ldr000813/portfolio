@@ -57,7 +57,7 @@ export default function Admin() {
 
     // モデル順（先頭から順に試す＝バージョンダウン）。NEXT_PUBLIC_GEMINI_MODELS で上書き可。
     const envModels = (process.env.NEXT_PUBLIC_GEMINI_MODELS || "").split(",").map((s) => s.trim()).filter(Boolean);
-    const MODELS = envModels.length ? envModels : ["gemini-2.5-flash", "gemini-flash-latest", "gemini-2.5-pro", "gemini-3.8-flash"];
+    const MODELS = envModels.length ? envModels : ["gemini-3.8-flash", "gemini-flash-latest", "gemini-3.1-pro-preview"];
     const targets: { code: "zh" | "en"; name: string }[] = [{ code: "zh", name: "中文" }, { code: "en", name: "英語" }];
 
     async function batchTranslate(target: string, texts: string[]): Promise<{ out?: string[]; errors: string[] }> {
@@ -77,7 +77,7 @@ export default function Admin() {
 
     for (const tg of targets) {
       const { texts, apply } = extract(c);
-      const batches = chunk(texts, 25);
+      const batches = chunk(texts, 15);
       const translated: string[] = [];
       for (let i = 0; i < batches.length; i++) {
         setMsg(`${tg.name}に翻訳中…（${i + 1}/${batches.length}）`);
