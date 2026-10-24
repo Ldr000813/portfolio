@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Content, Service, Work, Why, Step, Price, Metric, Exp, Edu } from "@/lib/content";
 import { prepareImage } from "@/lib/imagePrep";
+import { extract, chunk } from "@/lib/translatable";
 
 const PW_KEY = "portfolio_admin_pw";
 
@@ -49,20 +50,33 @@ export default function Admin() {
   // 翻訳ボタンを押したときだけ実行（API課金を抑えるため自動では走らせない）
   async function translateNow() {
     if (!c) return;
-    setBusy(true); setMsg("日本語を保存して、中文・英語に翻訳中…（10〜20秒ほど）");
-    const s = await fetch(`/api/admin/content?lang=ja`, { method: "POST", headers: { "x-admin-password": pw, "Content-Type": "application/json" }, body: JSON.stringify(c) });
+    const jHeaders = { "x-admin-password": pw, "Content-Type": "application/json" };
+    setBusy(true); setMsg("日本語を保存中…");
+    const s = await fetch(`/api/admin/content?lang=ja`, { method: "POST", headers: jHeaders, body: JSON.stringify(c) });
     if (!s.ok) { setBusy(false); setMsg("日本語の保存に失敗しました。"); return; }
-    const hdr = { "x-admin-password": pw };
-    const [rz, re] = await Promise.all([
-      fetch("/api/admin/translate?target=zh", { method: "POST", headers: hdr }),
-      fetch("/api/admin/translate?target=en", { method: "POST", headers: hdr }),
-    ]);
+
+    const targets: { code: "zh" | "en"; name: string }[] = [{ code: "zh", name: "中文" }, { code: "en", name: "英語" }];
+    for (const tg of targets) {
+      const { texts, apply } = extract(c);
+      const batches = chunk(texts, 35);
+      const translated: string[] = [];
+      for (let i = 0; i < batches.length; i++) {
+        setMsg(`${tg.name}に翻訳中…（${i + 1}/${batches.length}）`);
+        const r = await fetch(`/api/admin/translate-batch?target=${tg.code}`, { method: "POST", headers: jHeaders, body: JSON.stringify({ texts: batches[i] }) });
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok || !Array.isArray(j.translations) || j.translations.length !== batches[i].length) {
+          setBusy(false);
+          setMsg(`${tg.name}の翻訳に失敗しました（${r.status}）。もう一度お試しください。`);
+          return;
+        }
+        translated.push(...j.translations);
+      }
+      const translatedContent = apply(translated);
+      const sv = await fetch(`/api/admin/content?lang=${tg.code}`, { method: "POST", headers: jHeaders, body: JSON.stringify(translatedContent) });
+      if (!sv.ok) { setBusy(false); setMsg(`${tg.name}の保存に失敗しました。`); return; }
+    }
     setBusy(false);
-    if (rz.ok && re.ok) { setMsg("✅ 中文・英語に翻訳して保存しました"); return; }
-    const fails: string[] = [];
-    if (!rz.ok) fails.push("中文(" + rz.status + ")");
-    if (!re.ok) fails.push("英語(" + re.status + ")");
-    setMsg("⚠ 一部失敗：" + fails.join(" / ") + "。もう一度お試しください（混雑時は再実行で通ることがあります）。");
+    setMsg("✅ 中文・英語に翻訳して保存しました");
   }
 
   // helpers
