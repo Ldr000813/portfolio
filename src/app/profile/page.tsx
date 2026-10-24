@@ -43,6 +43,12 @@ export default async function ProfilePage() {
         <div className="pf-h">スキル / Skills</div>
         <div className="sk">{p.skills.map((s, i) => <span key={i}>{s}</span>)}</div>
 
+        {p.languages && p.languages.length > 0 && (
+          <p style={{ marginTop: 18, color: "var(--slate)", fontSize: 14 }}>
+            <b style={{ color: "var(--ink)" }}>言語 / Languages：</b>{p.languages.join("・")}
+          </p>
+        )}
+
         {p.education.length > 0 && <>
           <div className="pf-h" style={{ marginTop: 44 }}>学歴 / Education</div>
           {p.education.map((e, i) => (

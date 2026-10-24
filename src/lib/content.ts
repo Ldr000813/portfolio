@@ -8,7 +8,7 @@ export type Step = { title: string; desc: string };
 export type Price = { svc: string; amt: string; note: string };
 export type Exp = { role: string; org: string; period: string; points: string[] };
 export type Edu = { school: string; detail: string; period: string };
-export type Profile = { headline: string; photo: string; summary: string; experience: Exp[]; skills: string[]; education: Edu[] };
+export type Profile = { headline: string; photo: string; summary: string; experience: Exp[]; skills: string[]; education: Edu[]; languages: string[] };
 
 export type Content = {
   name: string;
@@ -116,8 +116,10 @@ export const DEFAULT: Content = {
     ],
     skills: ["Next.js", "TypeScript", "React", "Supabase", "Vercel", "Node.js", "Web制作", "業務効率化", "AI / API連携", "コミュニティ運営", "企画・PM"],
     education: [
-      { school: "同志社大学", detail: "在学中（京田辺キャンパス）", period: "" },
+      { school: "同志社大学 理工学部 インテリジェント情報工学科", detail: "在学中（京田辺キャンパス）", period: "2023 – 現在" },
+      { school: "大阪府立泉北高等学校", detail: "卒業", period: "2019 – 2022" },
     ],
+    languages: ["日本語", "English", "中文"],
   },
 };
 

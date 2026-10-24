@@ -135,6 +135,7 @@ export default function Admin() {
         <button className="linkbtn" onClick={addExp}>＋ 職歴を追加</button>
 
         <Fld label="スキル（カンマ区切り）"><input className="in" value={c.profile.skills.join(", ")} onChange={(e) => upProfile({ skills: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) })} /></Fld>
+        <Fld label="言語（カンマ区切り）"><input className="in" value={(c.profile.languages || []).join(", ")} onChange={(e) => upProfile({ languages: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) })} /></Fld>
 
         <div style={{ fontSize: 12, fontWeight: 700, color: "#51607A", margin: "8px 0 6px" }}>学歴</div>
         {c.profile.education.map((ed, i) => (
