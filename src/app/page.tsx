@@ -53,6 +53,18 @@ export default async function Home() {
               <p className="sub">{w.sub}</p>
               <ul>{w.points.map((p, j) => <li key={j}>{p}</li>)}</ul>
               <div className="stack">{w.stack.map((s, j) => <span key={j}>{s}</span>)}</div>
+              {(w.url || w.demoId || w.demoPw) && (
+                <div className="work-access">
+                  {w.url && <a href={w.url} target="_blank" rel="noreferrer" className="work-link">{t.viewSite} ↗</a>}
+                  {(w.demoId || w.demoPw) && (
+                    <div className="work-cred">
+                      <span className="wc-h">{t.demoLogin}</span>
+                      {w.demoId && <span className="wc-kv">ID <b>{w.demoId}</b></span>}
+                      {w.demoPw && <span className="wc-kv">PW <b>{w.demoPw}</b></span>}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         ))}

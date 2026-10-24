@@ -2,7 +2,7 @@ import { list, put } from "@vercel/blob";
 
 export type Metric = { n: string; l: string };
 export type Service = { icon: string; title: string; desc: string };
-export type Work = { tag: string; title: string; sub: string; points: string[]; stack: string[]; image: string; accent: "blue" | "emerald" };
+export type Work = { tag: string; title: string; sub: string; points: string[]; stack: string[]; image: string; accent: "blue" | "emerald"; url: string; demoId: string; demoPw: string };
 export type Why = { title: string; desc: string };
 export type Step = { title: string; desc: string };
 export type Price = { svc: string; amt: string; note: string };
@@ -55,6 +55,7 @@ export const DEFAULT: Content = {
         "不正取得を防ぐ設計＋網羅的な自動テストで“本番品質”に",
       ],
       stack: ["Next.js", "TypeScript", "Supabase", "認証", "自動テスト"], image: "", accent: "blue",
+      url: "https://stamp-app-two.vercel.app", demoId: "", demoPw: "",
     },
     {
       tag: "コミュニティ / Webサイト", title: "多文化コミュニティ「となり」公式サイト",
@@ -65,6 +66,7 @@ export const DEFAULT: Content = {
         "日英対応・画像の表示位置調整など、運用目線の細かな作り込み",
       ],
       stack: ["Next.js", "TypeScript", "Gemini API", "Vercel", "多言語"], image: "", accent: "emerald",
+      url: "https://tonarikyoto.vercel.app", demoId: "", demoPw: "",
     },
   ],
   why: [

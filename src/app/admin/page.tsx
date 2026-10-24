@@ -293,6 +293,12 @@ export default function Admin() {
             <Fld label="説明"><textarea className="in" rows={2} value={w.sub} onChange={(e) => editItem("works", i, { sub: e.target.value })} /></Fld>
             <Fld label="ポイント（1行に1つ）"><textarea className="in" rows={3} value={w.points.join("\n")} onChange={(e) => editItem("works", i, { points: e.target.value.split("\n").map((s) => s.trim()).filter(Boolean) })} /></Fld>
             <Fld label="技術スタック（カンマ区切り）"><input className="in" value={w.stack.join(", ")} onChange={(e) => editItem("works", i, { stack: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) })} /></Fld>
+            <Fld label="サービスリンク（URL。空欄なら非表示）"><input className="in" placeholder="https://example.com" value={w.url || ""} onChange={(e) => editItem("works", i, { url: e.target.value })} /></Fld>
+            <div className="rowbtns">
+              <Fld label="デモ用 ユーザーID（任意）"><input className="in" value={w.demoId || ""} onChange={(e) => editItem("works", i, { demoId: e.target.value })} /></Fld>
+              <Fld label="デモ用 パスワード（任意）"><input className="in" value={w.demoPw || ""} onChange={(e) => editItem("works", i, { demoPw: e.target.value })} /></Fld>
+            </div>
+            <p style={{ fontSize: 11, color: "#8893A7", marginTop: -6 }}>※ ID/PWは公開ページにそのまま表示されます。閲覧用のデモアカウントのみ入力してください（本番の認証情報は入れない）。</p>
             <div className="fld"><span>画像（任意。未設定ならポイントを表示）</span>
               <div className="rowbtns">
                 {w.image && <img src={w.image} alt="" style={{ width: 90, height: 60, objectFit: "cover", borderRadius: 8, border: "1px solid #E6EAF1" }} />}
