@@ -138,13 +138,32 @@ async function readAt(path: string): Promise<any | null> {
   return r.ok ? await r.json() : null;
 }
 
+// リンク・画像・ID/PW・技術タグなど、言語に関係ない項目は常に日本語（原本）を使う。
+// これで日本語で設定すれば、翻訳し直さなくても全言語に反映される。
+function overlayFromJa(c: Content, ja: Content): Content {
+  const out: Content = JSON.parse(JSON.stringify(c));
+  out.contact.email = ja.contact.email;
+  out.contact.whatsapp = ja.contact.whatsapp;
+  out.contact.line = ja.contact.line;
+  out.contact.wechat = ja.contact.wechat;
+  out.profile.photo = ja.profile.photo;
+  out.profile.skills = ja.profile.skills;
+  out.services.forEach((s, i) => { if (ja.services[i]) s.icon = ja.services[i].icon; });
+  out.works.forEach((w, i) => {
+    const jw = ja.works[i];
+    if (jw) { w.image = jw.image; w.url = jw.url; w.demoId = jw.demoId; w.demoPw = jw.demoPw; w.stack = jw.stack; w.accent = jw.accent; }
+  });
+  return out;
+}
+
 export async function getContent(lang: Lang = "ja"): Promise<Content> {
   try {
-    let saved = await readAt(pathFor(lang));
-    // 翻訳未保存の言語は日本語にフォールバック（さらに旧データにも）
-    if (!saved && lang !== "ja") saved = await readAt(pathFor("ja"));
-    if (!saved) saved = await readAt("portfolio/content.json");
-    return saved ? { ...DEFAULT, ...saved } : DEFAULT;
+    const jaRaw = (await readAt(pathFor("ja"))) || (await readAt("portfolio/content.json"));
+    const ja: Content = jaRaw ? { ...DEFAULT, ...jaRaw } : DEFAULT;
+    if (lang === "ja") return ja;
+    const saved = await readAt(pathFor(lang));
+    const langContent: Content = saved ? { ...DEFAULT, ...saved } : ja;
+    return overlayFromJa(langContent, ja);
   } catch {
     return DEFAULT;
   }
