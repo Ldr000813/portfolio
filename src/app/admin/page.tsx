@@ -137,6 +137,13 @@ export default function Admin() {
     if (r.ok) upProfile({ photo: (await r.json()).url });
     else setMsg("写真のアップロードに失敗しました。");
   }
+  async function uploadWechatQr(file: File) {
+    const f = await prepareImage(file, 800);
+    const fd = new FormData(); fd.append("file", f);
+    const r = await fetch("/api/admin/upload", { method: "POST", headers: { "x-admin-password": pw }, body: fd });
+    if (r.ok) upContact({ wechat: (await r.json()).url });
+    else setMsg("QR画像のアップロードに失敗しました。");
+  }
 
   async function uploadWorkImg(i: number, file: File) {
     const f = await prepareImage(file);
@@ -349,8 +356,14 @@ export default function Admin() {
         <Fld label="メールアドレス"><input className="in" value={c.contact.email} onChange={(e) => upContact({ email: e.target.value })} /></Fld>
         <Fld label="WhatsApp（番号 または リンク。空欄なら非表示）"><input className="in" placeholder="例: 8190xxxxxxx / https://wa.me/8190xxxxxxx" value={c.contact.whatsapp || ""} onChange={(e) => upContact({ whatsapp: e.target.value })} /></Fld>
         <Fld label="LINE（URL。空欄なら非表示）"><input className="in" placeholder="例: https://lin.ee/xxxx / https://line.me/ti/p/xxxx" value={c.contact.line || ""} onChange={(e) => upContact({ line: e.target.value })} /></Fld>
-        <Fld label="WeChat（ID または リンク。空欄なら非表示）"><input className="in" placeholder="例: wechat_id / https://..." value={c.contact.wechat || ""} onChange={(e) => upContact({ wechat: e.target.value })} /></Fld>
-        <p style={{ fontSize: 11, color: "#8893A7", marginTop: -6 }}>※ リンク類は翻訳されず全言語で共通です。IDだけ入れた場合：WhatsApp→自動で wa.me リンク化、WeChat→コピー用に表示されます。</p>
+        <div className="fld"><span>WeChat QRコード（画像。空欄なら非表示）</span>
+          <div className="rowbtns">
+            {c.contact.wechat && <img src={c.contact.wechat} alt="" style={{ width: 70, height: 70, objectFit: "cover", borderRadius: 8, border: "1px solid #E6EAF1" }} />}
+            <input type="file" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadWechatQr(f); e.currentTarget.value = ""; }} />
+            {c.contact.wechat && <button type="button" className="linkbtn del" onClick={() => upContact({ wechat: "" })}>外す</button>}
+          </div>
+        </div>
+        <p style={{ fontSize: 11, color: "#8893A7", marginTop: -6 }}>※ WeChatはリンク遷移ができないため、QRコード画像をアップロードします（ダイアログで「QR」を押すと表示されスキャンできます）。リンク類は翻訳されず全言語共通です。WhatsAppは番号だけ入れると自動で wa.me リンク化。</p>
       </div>
 
       <div className="savebar">

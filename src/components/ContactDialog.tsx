@@ -26,44 +26,54 @@ export default function ContactDialog({ contact, btnLabel, emailLabel, pickLabel
   contact: Contact; btnLabel: string; emailLabel: string; pickLabel: string;
 }) {
   const [open, setOpen] = useState(false);
-  const [copied, setCopied] = useState("");
+  const [qr, setQr] = useState<string | null>(null);
 
-  const asLink = (v: string) => /^https?:\/\/|^mailto:|^weixin:/i.test(v);
-  const items: { key: string; label: string; href?: string; copy?: string }[] = [];
+  const asLink = (v: string) => /^https?:\/\//i.test(v);
+  const items: { key: string; label: string; href?: string; qr?: string }[] = [];
   if (contact.email) items.push({ key: "email", label: emailLabel, href: `mailto:${contact.email}` });
   if (contact.whatsapp) items.push({ key: "whatsapp", label: "WhatsApp", href: asLink(contact.whatsapp) ? contact.whatsapp : `https://wa.me/${contact.whatsapp.replace(/[^\d]/g, "")}` });
   if (contact.line) items.push({ key: "line", label: "LINE", href: contact.line });
-  if (contact.wechat) items.push(asLink(contact.wechat) ? { key: "wechat", label: "WeChat", href: contact.wechat } : { key: "wechat", label: "WeChat", copy: contact.wechat });
+  if (contact.wechat) items.push({ key: "wechat", label: "WeChat", qr: contact.wechat }); // QR画像URL
 
-  function onCopy(v: string) { try { navigator.clipboard?.writeText(v); setCopied(v); setTimeout(() => setCopied(""), 1500); } catch {} }
+  function close() { setOpen(false); setQr(null); }
 
   return (
     <>
       <button className="btn btn-primary" onClick={() => setOpen(true)}>{btnLabel}</button>
 
       {open && (
-        <div className="cd-overlay" onClick={() => setOpen(false)}>
+        <div className="cd-overlay" onClick={close}>
           <div className="cd-modal" onClick={(e) => e.stopPropagation()}>
             <div className="cd-head">
-              <span>{pickLabel}</span>
-              <button className="cd-x" aria-label="close" onClick={() => setOpen(false)}>✕</button>
+              <span>{qr ? "WeChat" : pickLabel}</span>
+              <button className="cd-x" aria-label="close" onClick={close}>✕</button>
             </div>
-            <div className="cd-list">
-              {items.map((it) => it.href ? (
-                <a key={it.key} className="cd-item" href={it.href} target={it.key === "email" ? undefined : "_blank"} rel="noreferrer">
-                  <span className="cd-ic" style={{ background: COLOR[it.key] }}><Icon name={it.key} /></span>
-                  <span className="cd-label">{it.label}</span>
-                  <span className="cd-arrow">↗</span>
-                </a>
-              ) : (
-                <button key={it.key} className="cd-item" onClick={() => onCopy(it.copy!)}>
-                  <span className="cd-ic" style={{ background: COLOR[it.key] }}><Icon name={it.key} /></span>
-                  <span className="cd-label">{it.label}<span className="cd-sub">{it.copy}</span></span>
-                  <span className="cd-arrow">{copied === it.copy ? "✓ コピー" : "コピー"}</span>
-                </button>
-              ))}
-              {items.length === 0 && <p style={{ color: "#8893A7", fontSize: 14 }}>連絡先が未設定です。</p>}
-            </div>
+
+            {qr ? (
+              <div className="cd-qr">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={qr} alt="WeChat QR" />
+                <p>WeChatアプリで読み取ってください / Scan with WeChat</p>
+                <button className="cd-back" onClick={() => setQr(null)}>← 戻る</button>
+              </div>
+            ) : (
+              <div className="cd-list">
+                {items.map((it) => it.href ? (
+                  <a key={it.key} className="cd-item" href={it.href} target={it.key === "email" ? undefined : "_blank"} rel="noreferrer">
+                    <span className="cd-ic" style={{ background: COLOR[it.key] }}><Icon name={it.key} /></span>
+                    <span className="cd-label">{it.label}</span>
+                    <span className="cd-arrow">↗</span>
+                  </a>
+                ) : (
+                  <button key={it.key} className="cd-item" onClick={() => setQr(it.qr!)}>
+                    <span className="cd-ic" style={{ background: COLOR[it.key] }}><Icon name={it.key} /></span>
+                    <span className="cd-label">{it.label}</span>
+                    <span className="cd-arrow">QR ↗</span>
+                  </button>
+                ))}
+                {items.length === 0 && <p style={{ color: "#8893A7", fontSize: 14 }}>連絡先が未設定です。</p>}
+              </div>
+            )}
           </div>
         </div>
       )}
