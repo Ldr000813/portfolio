@@ -55,20 +55,24 @@ export default function Admin() {
     const s = await fetch(`/api/admin/content?lang=ja`, { method: "POST", headers: jHeaders, body: JSON.stringify(c) });
     if (!s.ok) { setBusy(false); setMsg("日本語の保存に失敗しました。"); return; }
 
-    // 安定優先のモデル順（先頭から順に試す＝バージョンダウン）
-    const MODELS = ["gemini-2.5-flash", "gemini-flash-latest", "gemini-2.5-pro", "gemini-3.8-flash"];
+    // モデル順（先頭から順に試す＝バージョンダウン）。NEXT_PUBLIC_GEMINI_MODELS で上書き可。
+    const envModels = (process.env.NEXT_PUBLIC_GEMINI_MODELS || "").split(",").map((s) => s.trim()).filter(Boolean);
+    const MODELS = envModels.length ? envModels : ["gemini-2.5-flash", "gemini-flash-latest", "gemini-2.5-pro", "gemini-3.8-flash"];
     const targets: { code: "zh" | "en"; name: string }[] = [{ code: "zh", name: "中文" }, { code: "en", name: "英語" }];
 
-    async function batchTranslate(target: string, texts: string[]): Promise<string[] | null> {
+    async function batchTranslate(target: string, texts: string[]): Promise<{ out?: string[]; errors: string[] }> {
+      const errors: string[] = [];
       for (const model of MODELS) {
         try {
           const r = await fetch(`/api/admin/translate-batch?target=${target}&model=${model}`, { method: "POST", headers: jHeaders, body: JSON.stringify({ texts }) });
-          if (!r.ok) continue;
-          const j = await r.json();
-          if (Array.isArray(j.translations) && j.translations.length === texts.length) return j.translations;
-        } catch { /* try next model */ }
+          const j = await r.json().catch(() => ({}));
+          if (r.ok && Array.isArray(j.translations) && j.translations.length === texts.length) return { out: j.translations, errors };
+          errors.push(`${model}: HTTP ${r.status}${j.error ? ` ${j.error}` : ""}${j.detail ? ` — ${j.detail}` : ""}`);
+        } catch (e: any) {
+          errors.push(`${model}: network ${e?.message || "error"}`);
+        }
       }
-      return null;
+      return { errors };
     }
 
     for (const tg of targets) {
@@ -77,9 +81,14 @@ export default function Admin() {
       const translated: string[] = [];
       for (let i = 0; i < batches.length; i++) {
         setMsg(`${tg.name}に翻訳中…（${i + 1}/${batches.length}）`);
-        const out = await batchTranslate(tg.code, batches[i]);
-        if (!out) { setBusy(false); setMsg(`${tg.name}の翻訳に失敗しました。時間をおいて再実行してください。`); return; }
-        translated.push(...out);
+        const res = await batchTranslate(tg.code, batches[i]);
+        if (!res.out) {
+          setBusy(false);
+          console.error("[translate] " + tg.name + " batch " + (i + 1), res.errors);
+          setMsg(`${tg.name}の翻訳に失敗（バッチ${i + 1}）：` + res.errors.join(" ／ "));
+          return;
+        }
+        translated.push(...res.out);
       }
       const translatedContent = apply(translated);
       const sv = await fetch(`/api/admin/content?lang=${tg.code}`, { method: "POST", headers: jHeaders, body: JSON.stringify(translatedContent) });

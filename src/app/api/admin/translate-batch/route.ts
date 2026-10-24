@@ -18,13 +18,13 @@ export async function POST(req: NextRequest) {
   if (!Array.isArray(texts)) return NextResponse.json({ error: "bad_request" }, { status: 400 });
   if (texts.length === 0) return NextResponse.json({ translations: [] });
 
-  const out = await translateArray(texts.map((t) => String(t)), label, key, model);
-  if (!out) return NextResponse.json({ error: "translate_failed", model }, { status: 502 });
-  return NextResponse.json({ translations: out, model });
+  const res = await translateArray(texts.map((t) => String(t)), label, key, model);
+  if (!res.translations) return NextResponse.json({ error: "translate_failed", model, detail: res.detail }, { status: 502 });
+  return NextResponse.json({ translations: res.translations, model });
 }
 
 // 1モデルだけ試す（9秒で打ち切り）。バージョンダウンはクライアント側で回す。
-async function translateArray(texts: string[], label: string, key: string, model: string): Promise<string[] | null> {
+async function translateArray(texts: string[], label: string, key: string, model: string): Promise<{ translations?: string[]; detail?: string }> {
   const prompt = `Translate each element of the following JSON string array into ${label}.
 Output ONLY a JSON array of the same length and same order; each element is the translation of the corresponding input element.
 Keep unchanged: brand/tech/proper nouns (Next.js, TypeScript, React, Supabase, Vercel, Node.js, Gemini, LINE, SIED, となり/Tonari, 同志社大学, 泉北高校), URLs, and email addresses.
@@ -41,15 +41,20 @@ ${JSON.stringify(texts)}`;
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body), signal: ctrl.signal,
     });
     clearTimeout(timer);
-    if (!r.ok) return null;
+    if (!r.ok) {
+      const body = (await r.text().catch(() => "")).replace(/\s+/g, " ").slice(0, 220);
+      return { detail: `HTTP ${r.status} ${body}` };
+    }
     const data = await r.json();
+    const fr = data?.candidates?.[0]?.finishReason;
     const text: string = data?.candidates?.[0]?.content?.parts?.map((p: any) => p.text).join("") || "";
+    if (!text) return { detail: `empty response${fr ? ` (finishReason=${fr})` : ""}` };
     const arr = safeArr(text);
-    if (Array.isArray(arr) && arr.length === texts.length) return arr.map((x) => String(x));
-    return null;
-  } catch {
+    if (Array.isArray(arr) && arr.length === texts.length) return { translations: arr.map((x) => String(x)) };
+    return { detail: `bad output: got ${Array.isArray(arr) ? arr.length : "non-array"} vs expected ${texts.length}. sample=${text.slice(0, 120)}` };
+  } catch (e: any) {
     clearTimeout(timer);
-    return null;
+    return { detail: e?.name === "AbortError" ? "timeout(9s)" : `fetch error: ${e?.message || "unknown"}` };
   }
 }
 
