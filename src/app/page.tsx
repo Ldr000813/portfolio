@@ -7,7 +7,7 @@ export default async function Home() {
   return (
     <>
       <header><div className="wrap nav">
-        <div className="brand"><span className="mk">{c.name.slice(0, 1)}</span> {c.name} <span className="tg">／ {c.tagline}</span></div>
+        <a className="brand" href="/profile" title="プロフィール"><span className="mk">{c.name.slice(0, 1)}</span> {c.name} <span className="tg">／ {c.tagline}</span></a>
         <nav className="nav-links">
           <a href="#services">できること</a><a href="#works">実績</a><a href="#price">料金</a><a href="#contact">お問い合わせ</a>
         </nav>

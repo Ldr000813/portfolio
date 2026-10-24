@@ -95,6 +95,30 @@ header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.88);backdro
 
 footer{padding:34px 0;color:var(--mute);font-size:13px;text-align:center;border-top:1px solid var(--line)}
 
+/* profile */
+.pf-top{height:58px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}
+.pf-hero{background:linear-gradient(160deg,var(--navy),var(--navy2));color:#fff}
+.pf-hero .wrap{padding:60px 24px 54px;display:flex;gap:30px;align-items:center;flex-wrap:wrap}
+.pf-photo{width:112px;height:112px;border-radius:20px;object-fit:cover;border:3px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);display:grid;place-items:center;font-size:40px;font-weight:800;color:#8FB4FF;flex:none}
+.pf-hname{font-size:32px;font-weight:800;letter-spacing:-.01em}
+.pf-head{color:#9DC0FF;font-weight:700;margin-top:6px}
+.pf-sum{color:#C6D2E6;font-size:15px;margin-top:14px;max-width:640px;line-height:1.9}
+.pf-sec{padding:50px 0}
+.pf-h{font-size:13px;font-weight:800;letter-spacing:.12em;color:var(--accent);text-transform:uppercase;margin-bottom:22px}
+.exp{display:grid;grid-template-columns:200px 1fr;gap:20px;padding:22px 0;border-top:1px solid var(--line)}
+.exp .when{color:var(--slate);font-size:13.5px;font-weight:700}
+.exp .org{font-size:13px;color:var(--mute);margin-top:3px}
+.exp .role{font-size:17px;font-weight:800}
+.exp ul{list-style:none;margin-top:10px;display:flex;flex-direction:column;gap:6px}
+.exp li{font-size:14px;color:var(--ink);padding-left:20px;position:relative}
+.exp li:before{content:"";position:absolute;left:0;top:9px;width:7px;height:7px;border-radius:50%;background:var(--accent)}
+.sk{display:flex;flex-wrap:wrap;gap:8px}
+.sk span{font-size:13px;font-weight:700;color:var(--navy);background:#EEF3FF;border:1px solid #DCE6FF;border-radius:8px;padding:6px 12px}
+.edu{padding:14px 0;border-top:1px solid var(--line)}
+.edu .s{font-weight:800}
+.edu .d{color:var(--slate);font-size:14px}
+@media(max-width:700px){ .exp{grid-template-columns:1fr;gap:6px} .pf-hname{font-size:26px} }
+
 /* admin */
 .adminwrap{max-width:860px;margin:0 auto;padding:40px 20px}
 .fld{display:block;margin-bottom:14px}

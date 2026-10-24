@@ -6,6 +6,9 @@ export type Work = { tag: string; title: string; sub: string; points: string[]; 
 export type Why = { title: string; desc: string };
 export type Step = { title: string; desc: string };
 export type Price = { svc: string; amt: string; note: string };
+export type Exp = { role: string; org: string; period: string; points: string[] };
+export type Edu = { school: string; detail: string; period: string };
+export type Profile = { headline: string; photo: string; summary: string; experience: Exp[]; skills: string[]; education: Edu[] };
 
 export type Content = {
   name: string;
@@ -19,6 +22,7 @@ export type Content = {
   pricing: Price[];
   pricingNote: string;
   contact: { title: string; sub: string; email: string };
+  profile: Profile;
 };
 
 export const DEFAULT: Content = {
@@ -83,6 +87,38 @@ export const DEFAULT: Content = {
   ],
   pricingNote: "※ あくまで目安です。地域の団体・個人店向けに、予算に合わせて柔軟に対応します。",
   contact: { title: "まずは、気軽にご相談ください。", sub: "「こんなこと、できる？」の一言からで大丈夫です。お見積り・ご相談は無料です。", email: "liderun26@gmail.com" },
+  profile: {
+    headline: "多文化コミュニティ創業者 ／ Webエンジニア（受託開発）",
+    photo: "",
+    summary:
+      "京田辺を拠点に、Web開発と地域コミュニティづくりの両面で活動する学生起業家。ITベンチャーでの実務と受託開発を通じて、企画・設計・開発から本番運用までを一貫して担う。2025年には多文化交流コミュニティ「となり」を創業し、留学生と地域住民が対等に出会う場を運営。『人を起点に、テクノロジーで地域の課題を解く』を信条とする。",
+    experience: [
+      { role: "創業者・代表", org: "多文化交流コミュニティ「となり」", period: "2025 – 現在", points: [
+        "同志社大学の学生を中心に、留学生と地域住民が対等に交流するコミュニティを立ち上げ",
+        "公式サイト・SNS・LINEを含む運営基盤をゼロから構築し、イベントを企画・運営",
+        "京田辺市南部まちづくりセンターの団体登録を取得し、行政・大学との連携を推進",
+      ] },
+      { role: "Webエンジニア（フリーランス／受託開発）", org: "個人事業", period: "2024 – 現在", points: [
+        "地域の店舗・団体向けに、Webサイト・予約フォーム・業務効率化ツールを設計・開発",
+        "Next.js / TypeScript / Supabase を用い、認証・DB・管理画面・自動テストまで本番品質で実装",
+        "地域周遊スタンプラリーアプリを企画から本番運用まで一貫して担当",
+      ] },
+      { role: "プロダクト開発", org: "ITスタートアップ", period: "2023 – 2024", points: [
+        "少人数チームで、プロダクト開発・新規事業の立ち上げに関与",
+        "要件定義から実装・改善までを高速に回し、事業づくりの実務を経験",
+      ] },
+      { role: "学生スタッフ", org: "同志社大学 国際学生支援（SIED）", period: "2025 – 現在", points: [
+        "留学生のサポートおよび国際交流イベントの企画・運営に従事",
+      ] },
+      { role: "メンバー", org: "同志社大学 起業部 ／ ビジネスコンテスト", period: "2025", points: [
+        "事業プランを立案し、学内外のビジネスコンテストに出場",
+      ] },
+    ],
+    skills: ["Next.js", "TypeScript", "React", "Supabase", "Vercel", "Node.js", "Web制作", "業務効率化", "AI / API連携", "コミュニティ運営", "企画・PM"],
+    education: [
+      { school: "同志社大学", detail: "在学中（京田辺キャンパス）", period: "" },
+    ],
+  },
 };
 
 const PATH = "portfolio/content.json";

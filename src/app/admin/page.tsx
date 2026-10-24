@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { Content, Service, Work, Why, Step, Price, Metric } from "@/lib/content";
+import { Content, Service, Work, Why, Step, Price, Metric, Exp, Edu } from "@/lib/content";
 import { prepareImage } from "@/lib/imagePrep";
 
 const PW_KEY = "portfolio_admin_pw";
@@ -54,6 +54,22 @@ export default function Admin() {
   const addMetric = () => upHero({ metrics: [...c!.hero.metrics, { n: "", l: "" }] });
   const delMetric = (i: number) => upHero({ metrics: c!.hero.metrics.filter((_, j) => j !== i) });
 
+  // profile helpers
+  const upProfile = (patch: Partial<Content["profile"]>) => setC((p) => (p ? { ...p, profile: { ...p.profile, ...patch } } : p));
+  const editExp = (i: number, patch: Partial<Exp>) => upProfile({ experience: c!.profile.experience.map((e, j) => (j === i ? { ...e, ...patch } : e)) });
+  const addExp = () => upProfile({ experience: [...c!.profile.experience, { role: "", org: "", period: "", points: [] }] });
+  const delExp = (i: number) => upProfile({ experience: c!.profile.experience.filter((_, j) => j !== i) });
+  const editEdu = (i: number, patch: Partial<Edu>) => upProfile({ education: c!.profile.education.map((e, j) => (j === i ? { ...e, ...patch } : e)) });
+  const addEdu = () => upProfile({ education: [...c!.profile.education, { school: "", detail: "", period: "" }] });
+  const delEdu = (i: number) => upProfile({ education: c!.profile.education.filter((_, j) => j !== i) });
+  async function uploadPhoto(file: File) {
+    const f = await prepareImage(file, 600);
+    const fd = new FormData(); fd.append("file", f);
+    const r = await fetch("/api/admin/upload", { method: "POST", headers: { "x-admin-password": pw }, body: fd });
+    if (r.ok) upProfile({ photo: (await r.json()).url });
+    else setMsg("写真のアップロードに失敗しました。");
+  }
+
   async function uploadWorkImg(i: number, file: File) {
     const f = await prepareImage(file);
     const fd = new FormData(); fd.append("file", f);
@@ -87,6 +103,53 @@ export default function Admin() {
         <h3>基本</h3>
         <Fld label="名前"><input className="in" value={c.name} onChange={(e) => up({ name: e.target.value })} /></Fld>
         <Fld label="肩書き（名前の横）"><input className="in" value={c.tagline} onChange={(e) => up({ tagline: e.target.value })} /></Fld>
+      </div>
+
+      <div className="block">
+        <h3>プロフィール（ロゴをクリックで開くページ）</h3>
+        <Fld label="肩書き（ヘッドライン）"><input className="in" value={c.profile.headline} onChange={(e) => upProfile({ headline: e.target.value })} /></Fld>
+        <div className="fld"><span>顔写真（任意）</span>
+          <div className="rowbtns">
+            {c.profile.photo && <img src={c.profile.photo} alt="" style={{ width: 60, height: 60, objectFit: "cover", borderRadius: 10, border: "1px solid #E6EAF1" }} />}
+            <input type="file" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadPhoto(f); e.currentTarget.value = ""; }} />
+            {c.profile.photo && <button className="linkbtn del" onClick={() => upProfile({ photo: "" })}>外す</button>}
+          </div>
+        </div>
+        <Fld label="自己紹介（サマリー）"><textarea className="in" rows={4} value={c.profile.summary} onChange={(e) => upProfile({ summary: e.target.value })} /></Fld>
+
+        <div style={{ fontSize: 12, fontWeight: 700, color: "#51607A", margin: "8px 0 6px" }}>職歴</div>
+        {c.profile.experience.map((ex, i) => (
+          <div className="item" key={i}>
+            <div className="rowbtns" style={{ marginBottom: 6 }}>
+              <strong style={{ flex: 1 }}>職歴 {i + 1}</strong>
+              <button className="linkbtn del" onClick={() => delExp(i)}>削除</button>
+            </div>
+            <div className="rowbtns">
+              <input className="in" style={{ flex: 2 }} placeholder="役職（例: 創業者・代表）" value={ex.role} onChange={(e) => editExp(i, { role: e.target.value })} />
+              <input className="in" style={{ width: 150 }} placeholder="期間（例: 2025 – 現在）" value={ex.period} onChange={(e) => editExp(i, { period: e.target.value })} />
+            </div>
+            <input className="in" style={{ marginTop: 6 }} placeholder="組織・会社（例: となり / 個人事業）" value={ex.org} onChange={(e) => editExp(i, { org: e.target.value })} />
+            <textarea className="in" rows={3} style={{ marginTop: 6 }} placeholder="実績・内容（1行に1つ）" value={ex.points.join("\n")} onChange={(e) => editExp(i, { points: e.target.value.split("\n").map((s) => s.trim()).filter(Boolean) })} />
+          </div>
+        ))}
+        <button className="linkbtn" onClick={addExp}>＋ 職歴を追加</button>
+
+        <Fld label="スキル（カンマ区切り）"><input className="in" value={c.profile.skills.join(", ")} onChange={(e) => upProfile({ skills: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) })} /></Fld>
+
+        <div style={{ fontSize: 12, fontWeight: 700, color: "#51607A", margin: "8px 0 6px" }}>学歴</div>
+        {c.profile.education.map((ed, i) => (
+          <div className="item" key={i}>
+            <div className="rowbtns">
+              <input className="in" style={{ flex: 1 }} placeholder="学校名" value={ed.school} onChange={(e) => editEdu(i, { school: e.target.value })} />
+              <button className="linkbtn del" onClick={() => delEdu(i)}>削除</button>
+            </div>
+            <div className="rowbtns" style={{ marginTop: 6 }}>
+              <input className="in" style={{ flex: 2 }} placeholder="詳細（例: 在学中）" value={ed.detail} onChange={(e) => editEdu(i, { detail: e.target.value })} />
+              <input className="in" style={{ width: 150 }} placeholder="期間（任意）" value={ed.period} onChange={(e) => editEdu(i, { period: e.target.value })} />
+            </div>
+          </div>
+        ))}
+        <button className="linkbtn" onClick={addEdu}>＋ 学歴を追加</button>
       </div>
 
       <div className="block">
