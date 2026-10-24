@@ -123,22 +123,31 @@ export const DEFAULT: Content = {
   },
 };
 
-const PATH = "portfolio/content.json";
+export type Lang = "ja" | "zh" | "en";
+const LANGS: Lang[] = ["ja", "zh", "en"];
+export function normLang(v: any): Lang { return LANGS.includes(v) ? v : "ja"; }
+const pathFor = (lang: Lang) => `portfolio/content-${lang}.json`;
 
-export async function getContent(): Promise<Content> {
+async function readAt(path: string): Promise<any | null> {
+  const { blobs } = await list({ prefix: path });
+  const b = blobs.find((x) => x.pathname === path);
+  if (!b) return null;
+  const r = await fetch(b.url, { cache: "no-store" });
+  return r.ok ? await r.json() : null;
+}
+
+export async function getContent(lang: Lang = "ja"): Promise<Content> {
   try {
-    const { blobs } = await list({ prefix: PATH });
-    const b = blobs.find((x) => x.pathname === PATH);
-    if (!b) return DEFAULT;
-    const r = await fetch(b.url, { cache: "no-store" });
-    if (!r.ok) return DEFAULT;
-    const saved = await r.json();
-    return { ...DEFAULT, ...saved };
+    let saved = await readAt(pathFor(lang));
+    // 翻訳未保存の言語は日本語にフォールバック（さらに旧データにも）
+    if (!saved && lang !== "ja") saved = await readAt(pathFor("ja"));
+    if (!saved) saved = await readAt("portfolio/content.json");
+    return saved ? { ...DEFAULT, ...saved } : DEFAULT;
   } catch {
     return DEFAULT;
   }
 }
 
-export async function saveContent(c: Content): Promise<void> {
-  await put(PATH, JSON.stringify(c), { access: "public", contentType: "application/json", addRandomSuffix: false });
+export async function saveContent(lang: Lang, c: Content): Promise<void> {
+  await put(pathFor(lang), JSON.stringify(c), { access: "public", contentType: "application/json", addRandomSuffix: false });
 }

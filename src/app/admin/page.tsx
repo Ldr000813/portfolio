@@ -10,34 +10,41 @@ function Fld({ label, children }: { label: string; children: React.ReactNode }) 
 }
 
 export default function Admin() {
+  type Lang = "ja" | "zh" | "en";
+  const LANGNAME: Record<Lang, string> = { ja: "日本語", zh: "中文", en: "English" };
   const [pw, setPw] = useState("");
   const [authed, setAuthed] = useState(false);
+  const [lang, setLang] = useState<Lang>("ja");
   const [c, setC] = useState<Content | null>(null);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
 
-  async function load(p = pw) {
-    const r = await fetch("/api/admin/content", { headers: { "x-admin-password": p }, cache: "no-store" });
+  async function load(p = pw, l: Lang = lang) {
+    const r = await fetch(`/api/admin/content?lang=${l}`, { headers: { "x-admin-password": p }, cache: "no-store" });
     if (!r.ok) return false;
     setC(await r.json()); return true;
   }
   useEffect(() => {
     const s = typeof window !== "undefined" ? sessionStorage.getItem(PW_KEY) : null;
-    if (s) { setPw(s); load(s).then((ok) => setAuthed(ok)); }
+    if (s) { setPw(s); load(s, "ja").then((ok) => setAuthed(ok)); }
   }, []); // eslint-disable-line
 
   async function login(e: React.FormEvent) {
     e.preventDefault(); setMsg("");
-    const ok = await load(pw);
+    const ok = await load(pw, lang);
     if (ok) { setAuthed(true); try { sessionStorage.setItem(PW_KEY, pw); } catch {} }
     else setMsg("パスワードが違います。");
+  }
+  async function switchLang(l: Lang) {
+    setLang(l); setMsg(""); setC(null);
+    await load(pw, l);
   }
   async function save() {
     if (!c) return;
     setBusy(true); setMsg("");
-    const r = await fetch("/api/admin/content", { method: "POST", headers: { "x-admin-password": pw, "Content-Type": "application/json" }, body: JSON.stringify(c) });
+    const r = await fetch(`/api/admin/content?lang=${lang}`, { method: "POST", headers: { "x-admin-password": pw, "Content-Type": "application/json" }, body: JSON.stringify(c) });
     setBusy(false);
-    setMsg(r.ok ? "✅ 保存しました（サイトに反映されます）" : "保存に失敗しました。");
+    setMsg(r.ok ? `✅ 「${LANGNAME[lang]}」を保存しました` : "保存に失敗しました。");
   }
 
   // helpers
@@ -94,10 +101,18 @@ export default function Admin() {
 
   return (
     <div className="adminwrap">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
         <h1 style={{ fontSize: 22, fontWeight: 800 }}>ポートフォリオ編集</h1>
         <a href="/" target="_blank" rel="noreferrer" className="linkbtn">サイトを開く ↗</a>
       </div>
+      <div className="lang" style={{ marginBottom: 6 }}>
+        {(["ja", "zh", "en"] as Lang[]).map((l) => (
+          <button key={l} onClick={() => switchLang(l)} className={lang === l ? "on" : ""}>{LANGNAME[l]}</button>
+        ))}
+      </div>
+      <p style={{ fontSize: 12, color: "#8893A7", marginBottom: 16 }}>
+        編集中の言語：<b style={{ color: "#1E2A3A" }}>{LANGNAME[lang]}</b>。言語ごとに別々に保存されます（未保存の言語は日本語の内容が表示されます）。
+      </p>
 
       <div className="block">
         <h3>基本</h3>

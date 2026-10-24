@@ -18,11 +18,20 @@ section{padding:84px 0}
 
 header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.88);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
 .nav{display:flex;align-items:center;justify-content:space-between;height:66px}
-.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:17px}
-.brand .mk{width:30px;height:30px;border-radius:8px;background:var(--navy);color:#fff;display:grid;place-items:center;font-size:14px;font-weight:800}
+.brand{display:flex;align-items:center;gap:10px}
+.brand .mk{width:30px;height:30px;border-radius:8px;background:var(--navy);color:#fff;display:grid;place-items:center;font-size:14px;font-weight:800;flex:none}
 .brand .tg{color:var(--mute);font-weight:600;font-size:13px}
+.brand-txt{display:flex;flex-direction:column;line-height:1.2}
+.brand-name{font-weight:800;font-size:17px}
+.brand-cap{font-size:11px;font-weight:700;color:var(--accent);margin-top:1px}
+.brand:hover .brand-cap{text-decoration:underline;text-underline-offset:2px}
 .nav-links{display:flex;gap:28px;font-size:14px;font-weight:600;color:var(--slate)}
 .nav-links a:hover{color:var(--ink)}
+.nav-right{display:flex;align-items:center;gap:12px}
+.lang{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff}
+.lang button{background:#fff;border:none;padding:6px 10px;font-size:12px;font-weight:700;color:var(--slate);cursor:pointer;border-left:1px solid var(--line)}
+.lang button:first-child{border-left:none}
+.lang button.on{background:var(--navy);color:#fff}
 .nav-cta{font-size:14px;padding:9px 16px}
 
 .hero{background:linear-gradient(160deg,var(--navy) 0%,var(--navy2) 100%);color:#fff;position:relative;overflow:hidden}
@@ -135,6 +144,7 @@ textarea.in{resize:vertical;line-height:1.6}
 
 @media(max-width:760px){
   .nav-links{display:none}
+  .nav-cta{display:none}
   .hero h1{font-size:30px}
   .grid,.whygrid{grid-template-columns:1fr}
   .case{grid-template-columns:1fr}
