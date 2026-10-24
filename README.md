@@ -21,6 +21,14 @@ npm run dev     # http://localhost:3000
 |---|---|
 | `ADMIN_PASSWORD` | 管理ログインのパスワード |
 | `BLOB_READ_WRITE_TOKEN` | 文言JSON・画像の保存用。Vercelで **公開（public）** のBlobストアを作成し接続すると自動で追加されます |
+| `GEMINI_API_KEY` | 自動翻訳用（日本語を保存→中文・英語へ自動翻訳）。[Google AI Studio](https://aistudio.google.com/apikey) で無料取得 |
+| `GEMINI_MODELS`（任意） | 翻訳に使うモデルの優先順（カンマ区切り）。未設定なら `gemini-2.5-flash` ほかに自動フォールバック |
+
+## 多言語（日本語・中文・English）
+
+- サイト右上の言語切替で表示を変更（Cookie保存）。固定ラベルは `src/lib/ui.ts` の3言語辞書。
+- 本文は言語ごとに保存（Blob `content-ja/zh/en.json`）。**日本語を `/admin` で保存すると、中文・英語へ自動翻訳して保存**されます（`GEMINI_API_KEY` が必要）。
+- 中文・英語タブで個別に手直しして保存すると、その言語だけ上書きできます（次に日本語を保存するとまた自動翻訳で上書きされる点に注意）。
 
 ## 公開（Vercel）
 

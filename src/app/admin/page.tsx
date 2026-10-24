@@ -43,8 +43,19 @@ export default function Admin() {
     if (!c) return;
     setBusy(true); setMsg("");
     const r = await fetch(`/api/admin/content?lang=${lang}`, { method: "POST", headers: { "x-admin-password": pw, "Content-Type": "application/json" }, body: JSON.stringify(c) });
-    setBusy(false);
-    setMsg(r.ok ? `✅ 「${LANGNAME[lang]}」を保存しました` : "保存に失敗しました。");
+    if (!r.ok) { setBusy(false); setMsg("保存に失敗しました。"); return; }
+    if (lang === "ja") {
+      setMsg("日本語を保存しました。中文・英語に自動翻訳中…（10〜20秒ほど）");
+      const tr = await fetch("/api/admin/translate", { method: "POST", headers: { "x-admin-password": pw } });
+      const j = await tr.json().catch(() => ({}));
+      setBusy(false);
+      if (tr.ok && j.ok) setMsg("✅ 日本語を保存し、中文・英語へ自動翻訳しました");
+      else if (tr.ok) setMsg("⚠ 日本語は保存。翻訳の一部に失敗：" + (j.failed || []).join(", "));
+      else setMsg("⚠ 日本語は保存しました。翻訳に失敗：" + (j.error || tr.status));
+    } else {
+      setBusy(false);
+      setMsg(`✅ 「${LANGNAME[lang]}」を保存しました（この言語のみ。日本語を保存すると自動翻訳されます）`);
+    }
   }
 
   // helpers
@@ -111,7 +122,10 @@ export default function Admin() {
         ))}
       </div>
       <p style={{ fontSize: 12, color: "#8893A7", marginBottom: 16 }}>
-        編集中の言語：<b style={{ color: "#1E2A3A" }}>{LANGNAME[lang]}</b>。言語ごとに別々に保存されます（未保存の言語は日本語の内容が表示されます）。
+        編集中の言語：<b style={{ color: "#1E2A3A" }}>{LANGNAME[lang]}</b>。
+        {lang === "ja"
+          ? "　日本語を「保存」すると、中文・英語へ自動翻訳して保存します（要 GEMINI_API_KEY）。"
+          : "　この言語だけを保存します。自動翻訳で上書きしたくない個別修正に。"}
       </p>
 
       <div className="block">
@@ -286,7 +300,7 @@ export default function Admin() {
       </div>
 
       <div className="savebar">
-        <button className="btn btn-primary" onClick={save} disabled={busy}>{busy ? "保存中…" : "保存する"}</button>
+        <button className="btn btn-primary" onClick={save} disabled={busy}>{busy ? "処理中…" : (lang === "ja" ? "保存＋自動翻訳" : "保存する")}</button>
         {msg && <span style={{ fontSize: 13, color: msg.startsWith("✅") ? "#0FB07A" : "#dc2626" }}>{msg}</span>}
       </div>
     </div>
