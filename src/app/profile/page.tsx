@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { getContent, normLang } from "@/lib/content";
 import { UI } from "@/lib/ui";
 import LanguageSwitch from "@/components/LanguageSwitch";
+import ContactDialog from "@/components/ContactDialog";
 
 export const dynamic = "force-dynamic";
 
@@ -63,8 +64,9 @@ export default async function ProfilePage() {
       <section className="contact"><div className="wrap">
         <h2>{t.pfContactTitle}</h2>
         <p>{t.pfContactSub}</p>
-        <div className="mailbox">✉ {c.contact.email}</div>
-        <div><a href={`mailto:${c.contact.email}`} className="btn btn-primary">{t.mailBtn}</a></div>
+        <div style={{ marginTop: 24 }}>
+          <ContactDialog contact={c.contact} btnLabel={t.contactBtn} emailLabel={t.emailLabel} pickLabel={t.contactPick} />
+        </div>
       </div></section>
 
       <footer>© {new Date().getFullYear()} {c.name} ・ {c.tagline} ・ 京田辺</footer>

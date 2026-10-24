@@ -10,6 +10,7 @@ type Dict = {
   processTitle: string;
   pricingTitle: string; pricingLead: string; colContent: string; colAmt: string; colFor: string;
   mailBtn: string;
+  contactBtn: string; emailLabel: string; contactPick: string;
   // profile
   back: string; expH: string; skillsH: string; langH: string; eduH: string;
   pfContactTitle: string; pfContactSub: string;
@@ -26,6 +27,7 @@ export const UI: Record<Lang, Dict> = {
     processTitle: "ご相談から公開まで",
     pricingTitle: "料金の目安", pricingLead: "内容によって変わります。まずは無料でご相談を。お見積りは無料です。", colContent: "内容", colAmt: "目安", colFor: "こんな方に",
     mailBtn: "メールで相談する",
+    contactBtn: "お問い合わせ", emailLabel: "メール", contactPick: "ご希望の方法をお選びください",
     back: "← トップに戻る", expH: "職歴 / Experience", skillsH: "スキル / Skills", langH: "言語 / Languages", eduH: "学歴 / Education",
     pfContactTitle: "お気軽にご連絡ください。", pfContactSub: "お仕事のご相談・ご依頼はこちらまで。",
   },
@@ -39,6 +41,7 @@ export const UI: Record<Lang, Dict> = {
     processTitle: "How we work",
     pricingTitle: "Pricing guide", pricingLead: "It depends on the scope. Let's talk first — quotes are free.", colContent: "What", colAmt: "From", colFor: "For whom",
     mailBtn: "Email me",
+    contactBtn: "Contact me", emailLabel: "Email", contactPick: "Choose how you'd like to reach me",
     back: "← Back to top", expH: "Experience", skillsH: "Skills", langH: "Languages", eduH: "Education",
     pfContactTitle: "Feel free to reach out.", pfContactSub: "For work inquiries, please contact me here.",
   },
@@ -52,6 +55,7 @@ export const UI: Record<Lang, Dict> = {
     processTitle: "从咨询到上线",
     pricingTitle: "价格参考", pricingLead: "依内容而定。欢迎先免费咨询，报价免费。", colContent: "内容", colAmt: "参考", colFor: "适合",
     mailBtn: "发邮件咨询",
+    contactBtn: "联系我", emailLabel: "邮箱", contactPick: "请选择联系方式",
     back: "← 返回首页", expH: "工作经历 / Experience", skillsH: "技能 / Skills", langH: "语言 / Languages", eduH: "教育经历 / Education",
     pfContactTitle: "欢迎随时联系。", pfContactSub: "工作咨询与委托请联系这里。",
   },

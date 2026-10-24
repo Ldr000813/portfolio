@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { getContent, normLang } from "@/lib/content";
 import { UI } from "@/lib/ui";
 import SiteHeader from "@/components/SiteHeader";
+import ContactDialog from "@/components/ContactDialog";
 
 export const dynamic = "force-dynamic";
 
@@ -88,8 +89,9 @@ export default async function Home() {
       <section id="contact" className="contact"><div className="wrap">
         <h2>{c.contact.title}</h2>
         <p>{c.contact.sub}</p>
-        <div className="mailbox">✉ {c.contact.email}</div>
-        <div><a href={`mailto:${c.contact.email}`} className="btn btn-primary">{t.mailBtn}</a></div>
+        <div style={{ marginTop: 24 }}>
+          <ContactDialog contact={c.contact} btnLabel={t.contactBtn} emailLabel={t.emailLabel} pickLabel={t.contactPick} />
+        </div>
       </div></section>
 
       <footer>

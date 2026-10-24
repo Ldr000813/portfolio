@@ -347,6 +347,10 @@ export default function Admin() {
         <Fld label="見出し"><input className="in" value={c.contact.title} onChange={(e) => upContact({ title: e.target.value })} /></Fld>
         <Fld label="説明"><textarea className="in" rows={2} value={c.contact.sub} onChange={(e) => upContact({ sub: e.target.value })} /></Fld>
         <Fld label="メールアドレス"><input className="in" value={c.contact.email} onChange={(e) => upContact({ email: e.target.value })} /></Fld>
+        <Fld label="WhatsApp（番号 または リンク。空欄なら非表示）"><input className="in" placeholder="例: 8190xxxxxxx / https://wa.me/8190xxxxxxx" value={c.contact.whatsapp || ""} onChange={(e) => upContact({ whatsapp: e.target.value })} /></Fld>
+        <Fld label="LINE（URL。空欄なら非表示）"><input className="in" placeholder="例: https://lin.ee/xxxx / https://line.me/ti/p/xxxx" value={c.contact.line || ""} onChange={(e) => upContact({ line: e.target.value })} /></Fld>
+        <Fld label="WeChat（ID または リンク。空欄なら非表示）"><input className="in" placeholder="例: wechat_id / https://..." value={c.contact.wechat || ""} onChange={(e) => upContact({ wechat: e.target.value })} /></Fld>
+        <p style={{ fontSize: 11, color: "#8893A7", marginTop: -6 }}>※ リンク類は翻訳されず全言語で共通です。IDだけ入れた場合：WhatsApp→自動で wa.me リンク化、WeChat→コピー用に表示されます。</p>
       </div>
 
       <div className="savebar">

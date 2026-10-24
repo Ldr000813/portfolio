@@ -21,7 +21,7 @@ export type Content = {
   process: Step[];
   pricing: Price[];
   pricingNote: string;
-  contact: { title: string; sub: string; email: string };
+  contact: { title: string; sub: string; email: string; whatsapp: string; line: string; wechat: string };
   profile: Profile;
 };
 
@@ -86,7 +86,7 @@ export const DEFAULT: Content = {
     { svc: "業務効率化・社内ツール", amt: "要相談", note: "毎回の手作業を自動化したい" },
   ],
   pricingNote: "※ あくまで目安です。地域の団体・個人店向けに、予算に合わせて柔軟に対応します。",
-  contact: { title: "まずは、気軽にご相談ください。", sub: "「こんなこと、できる？」の一言からで大丈夫です。お見積り・ご相談は無料です。", email: "liderun26@gmail.com" },
+  contact: { title: "まずは、気軽にご相談ください。", sub: "「こんなこと、できる？」の一言からで大丈夫です。お見積り・ご相談は無料です。", email: "liderun26@gmail.com", whatsapp: "", line: "", wechat: "" },
   profile: {
     headline: "多文化コミュニティ創業者 ／ Webエンジニア（受託開発）",
     photo: "",
