@@ -6,6 +6,13 @@ import ContactDialog from "@/components/ContactDialog";
 
 export const dynamic = "force-dynamic";
 
+const FEAT_ICONS = [
+  <svg key="shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l7 3v5c0 4.5-3 7.6-7 9-4-1.4-7-4.5-7-9V6l7-3Z" /><path d="M9 12l2 2 4-4" /></svg>,
+  <svg key="dash" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="4" width="7" height="7" rx="1.3" /><rect x="13" y="4" width="7" height="4.5" rx="1.3" /><rect x="13" y="11" width="7" height="9" rx="1.3" /><rect x="4" y="13.5" width="7" height="6.5" rx="1.3" /></svg>,
+  <svg key="bolt" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round"><path d="M13 3L5 13.5h6L10 21l8.5-10.5H12L13 3Z" /></svg>,
+  <svg key="globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M3 12h18" /><path d="M12 3c2.8 2.8 2.8 15.2 0 18M12 3c-2.8 2.8-2.8 15.2 0 18" /></svg>,
+];
+
 export default async function Home() {
   const lang = normLang(cookies().get("lang")?.value);
   const c = await getContent(lang);
@@ -46,24 +53,13 @@ export default async function Home() {
           <div className={"case " + w.accent} key={i}>
             <div className="thumb">
               {w.image ? <img src={w.image} alt="" /> : (
-                <div className="mockup">
-                  <div className="mk-win">
-                    <div className="mk-bar"><span /><span /><span />
-                      <div className="mk-url">{w.url ? w.url.replace(/^https?:\/\//, "") : w.tag}</div>
+                <div className="feat-grid">
+                  {w.stack.slice(0, 4).map((s, j) => (
+                    <div className="feat-tile" key={j}>
+                      <span className="feat-ic">{FEAT_ICONS[j % FEAT_ICONS.length]}</span>
+                      <span className="feat-cap">{s}</span>
                     </div>
-                    <div className="mk-body">
-                      <div className="mk-title">{w.title}</div>
-                      <div className="mk-chips">{w.stack.slice(0, 3).map((s, j) => <i key={j}>{s}</i>)}</div>
-                      <div className="mk-rows">
-                        {w.points.slice(0, 3).map((p, j) => (
-                          <div className="mk-row" key={j}>
-                            <span className="mk-ck">✓</span>
-                            <span className="mk-txt">{p.replace(/（.*$/, "").replace(/。.*$/, "")}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
+                  ))}
                 </div>
               )}
             </div>
