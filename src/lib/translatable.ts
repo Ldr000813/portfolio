@@ -18,6 +18,7 @@ export function extract(src: Content) {
   clone.works.forEach((w) => {
     add(w.tag, (v) => (w.tag = v)); add(w.title, (v) => (w.title = v)); add(w.sub, (v) => (w.sub = v));
     w.points.forEach((p, i) => add(p, (v) => (w.points[i] = v)));
+    (w.features || []).forEach((f) => add(f.label, (v) => (f.label = v)));
     (w.steps || []).forEach((s) => { add(s.title, (v) => (s.title = v)); add(s.desc, (v) => (s.desc = v)); });
   });
   clone.why.forEach((x) => { add(x.title, (v) => (x.title = v)); add(x.desc, (v) => (x.desc = v)); });

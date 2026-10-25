@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { Content, Service, Work, Why, Step, Price, Metric, Exp, Edu } from "@/lib/content";
 import { prepareImage } from "@/lib/imagePrep";
 import { extract, chunk } from "@/lib/translatable";
+import { FEATURE_ICONS, FEATURE_ICON_KEYS } from "@/lib/featureIcons";
 
 const PW_KEY = "portfolio_admin_pw";
 
@@ -153,6 +154,15 @@ export default function Admin() {
   }
   function delStep(wi: number, si: number) {
     setC((p) => { if (!p) return p; const works = [...p.works]; works[wi] = { ...works[wi], steps: (works[wi].steps || []).filter((_, k) => k !== si) }; return { ...p, works }; });
+  }
+  function editFeature(wi: number, fi: number, patch: any) {
+    setC((p) => { if (!p) return p; const works = [...p.works]; const features = [...(works[wi].features || [])]; features[fi] = { ...features[fi], ...patch }; works[wi] = { ...works[wi], features }; return { ...p, works }; });
+  }
+  function addFeature(wi: number) {
+    setC((p) => { if (!p) return p; const works = [...p.works]; works[wi] = { ...works[wi], features: [...(works[wi].features || []), { icon: "check", label: "" }] }; return { ...p, works }; });
+  }
+  function delFeature(wi: number, fi: number) {
+    setC((p) => { if (!p) return p; const works = [...p.works]; works[wi] = { ...works[wi], features: (works[wi].features || []).filter((_, k) => k !== fi) }; return { ...p, works }; });
   }
   async function uploadStepImg(wi: number, si: number, file: File) {
     const f = await prepareImage(file, 1000);
@@ -317,6 +327,24 @@ export default function Admin() {
             <p style={{ fontSize: 11, color: "#8893A7", marginTop: -6 }}>※ ID/PWは公開ページにそのまま表示されます。閲覧用のデモアカウントのみ入力してください（本番の認証情報は入れない）。</p>
 
             <div style={{ borderTop: "1px solid #eee", marginTop: 12, paddingTop: 10 }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "#51607A", marginBottom: 2 }}>アピール機能（カードのアイコンタイル・4〜6個推奨）</div>
+              <p style={{ fontSize: 11, color: "#8893A7", margin: "0 0 8px" }}>現場が欲しがる機能を短い言葉で。アイコンは言語共通、ラベルは翻訳対象です。</p>
+              {(w.features || []).map((f, fi) => (
+                <div className="rowbtns" key={fi} style={{ marginBottom: 6, alignItems: "center" }}>
+                  <span style={{ width: 30, height: 30, flex: "none", display: "grid", placeItems: "center", background: "#0F2744", borderRadius: 8, color: "#fff" }}>
+                    <span style={{ width: 20, height: 20, display: "block" }}>{FEATURE_ICONS[f.icon] || FEATURE_ICONS.check}</span>
+                  </span>
+                  <select className="in" style={{ width: 120, flex: "none" }} value={f.icon} onChange={(e) => editFeature(i, fi, { icon: e.target.value })}>
+                    {FEATURE_ICON_KEYS.map((k) => <option key={k} value={k}>{k}</option>)}
+                  </select>
+                  <input className="in" style={{ flex: 1 }} placeholder="ラベル（例: なりすまし対策）" value={f.label} onChange={(e) => editFeature(i, fi, { label: e.target.value })} />
+                  <button className="linkbtn del" onClick={() => delFeature(i, fi)}>削除</button>
+                </div>
+              ))}
+              <button className="linkbtn" onClick={() => addFeature(i)}>＋ 機能を追加</button>
+            </div>
+
+            <div style={{ borderTop: "1px solid #eee", marginTop: 12, paddingTop: 10 }}>
               <div style={{ fontSize: 12, fontWeight: 700, color: "#51607A", marginBottom: 6 }}>機能の流れ（詳細ページのステップ）</div>
               {(w.steps || []).map((s, si) => (
                 <div className="item" key={si}>
@@ -344,7 +372,7 @@ export default function Admin() {
             </div>
           </div>
         ))}
-        <button className="linkbtn" onClick={() => addItem("works", { tag: "", title: "", sub: "", points: [], stack: [], image: "", accent: "blue" })}>＋ 実績を追加</button>
+        <button className="linkbtn" onClick={() => addItem("works", { tag: "", title: "", sub: "", points: [], stack: [], features: [], image: "", accent: "blue", url: "", demoId: "", demoPw: "", steps: [] })}>＋ 実績を追加</button>
       </div>
 
       <div className="block">

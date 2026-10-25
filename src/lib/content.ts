@@ -3,7 +3,8 @@ import { list, put } from "@vercel/blob";
 export type Metric = { n: string; l: string };
 export type Service = { icon: string; title: string; desc: string };
 export type WorkStep = { title: string; desc: string; image: string };
-export type Work = { tag: string; title: string; sub: string; points: string[]; stack: string[]; image: string; accent: "blue" | "emerald"; url: string; demoId: string; demoPw: string; steps: WorkStep[] };
+export type Feature = { icon: string; label: string };
+export type Work = { tag: string; title: string; sub: string; points: string[]; stack: string[]; features: Feature[]; image: string; accent: "blue" | "emerald"; url: string; demoId: string; demoPw: string; steps: WorkStep[] };
 export type Why = { title: string; desc: string };
 export type Step = { title: string; desc: string };
 export type Price = { svc: string; amt: string; note: string };
@@ -55,7 +56,16 @@ export const DEFAULT: Content = {
         "店舗オーナーごとの権限、イベント管理、管理画面まで一式",
         "不正取得を防ぐ設計＋網羅的な自動テストで“本番品質”に",
       ],
-      stack: ["Next.js", "TypeScript", "Supabase", "認証", "自動テスト"], image: "", accent: "blue",
+      stack: ["Next.js", "TypeScript", "Supabase", "認証", "自動テスト"],
+      features: [
+        { icon: "lock", label: "ログイン認証" },
+        { icon: "shield", label: "なりすまし対策" },
+        { icon: "users", label: "同時接続に強い" },
+        { icon: "check", label: "不正取得を防止" },
+        { icon: "dashboard", label: "店舗管理画面" },
+        { icon: "bolt", label: "即時スタンプ付与" },
+      ],
+      image: "", accent: "blue",
       url: "https://stamp-app-two.vercel.app", demoId: "", demoPw: "",
       steps: [
         { title: "ワンタップで参加", desc: "Googleログインまたは匿名で、はじめてでもすぐに参加できます。", image: "" },
@@ -72,7 +82,16 @@ export const DEFAULT: Content = {
         "チラシ画像からAIがイベント情報を自動入力・匿名の日程調整ツール",
         "日英対応・画像の表示位置調整など、運用目線の細かな作り込み",
       ],
-      stack: ["Next.js", "TypeScript", "Gemini API", "Vercel", "多言語"], image: "", accent: "emerald",
+      stack: ["Next.js", "TypeScript", "Gemini API", "Vercel", "多言語"],
+      features: [
+        { icon: "sparkle", label: "AIで自動入力" },
+        { icon: "dashboard", label: "ノーコード更新" },
+        { icon: "globe", label: "多言語対応" },
+        { icon: "calendar", label: "日程調整ツール" },
+        { icon: "image", label: "写真ギャラリー管理" },
+        { icon: "users", label: "匿名で参加OK" },
+      ],
+      image: "", accent: "emerald",
       url: "https://tonarikyoto.vercel.app", demoId: "", demoPw: "",
       steps: [],
     },
@@ -150,19 +169,42 @@ async function readAt(path: string): Promise<any | null> {
 // これで日本語で設定すれば、翻訳し直さなくても全言語に反映される。
 function overlayFromJa(c: Content, ja: Content): Content {
   const out: Content = JSON.parse(JSON.stringify(c));
+  // 言語に関係ない項目は常に日本語（原本）を使う。
   out.contact.email = ja.contact.email;
   out.contact.whatsapp = ja.contact.whatsapp;
   out.contact.line = ja.contact.line;
   out.contact.wechat = ja.contact.wechat;
   out.profile.photo = ja.profile.photo;
   out.profile.skills = ja.profile.skills;
-  out.services.forEach((s, i) => { if (ja.services[i]) s.icon = ja.services[i].icon; });
-  out.works.forEach((w, i) => {
-    const jw = ja.works[i];
-    if (jw) {
-      w.image = jw.image; w.url = jw.url; w.demoId = jw.demoId; w.demoPw = jw.demoPw; w.stack = jw.stack; w.accent = jw.accent;
-      (w.steps || []).forEach((s, k) => { if (jw.steps?.[k]) s.image = jw.steps[k].image; });
-    }
+
+  // リスト系は「日本語の件数」を基準にする。未翻訳の項目（新規追加など）は
+  // 日本語のまま表示し、翻訳ボタンを押せば訳文に差し替わる。
+  const cs = c.services || [];
+  out.services = ja.services.map((js, i) => {
+    const t = cs[i] || js;
+    return { ...t, icon: js.icon };
+  });
+  const cw = c.works || [];
+  out.works = ja.works.map((jw, i) => {
+    const t = cw[i] || jw;
+    const steps = (jw.steps || []).map((jstep, k) => {
+      const ts = (t.steps || [])[k] || jstep;
+      return { ...ts, image: jstep.image };
+    });
+    const features = (jw.features || []).map((jf, k) => {
+      const tf = (t.features || [])[k] || jf;
+      return { ...tf, icon: jf.icon };
+    });
+    return { ...t, image: jw.image, url: jw.url, demoId: jw.demoId, demoPw: jw.demoPw, stack: jw.stack, accent: jw.accent, steps, features };
+  });
+  out.why = ja.why.map((j, i) => (c.why || [])[i] || j);
+  out.process = ja.process.map((j, i) => (c.process || [])[i] || j);
+  out.pricing = ja.pricing.map((j, i) => (c.pricing || [])[i] || j);
+  out.profile.experience = ja.profile.experience.map((j, i) => (c.profile.experience || [])[i] || j);
+  out.profile.education = ja.profile.education.map((j, i) => (c.profile.education || [])[i] || j);
+  out.profile.languages = ja.profile.languages.map((j, i) => {
+    const v = (c.profile.languages || [])[i];
+    return v !== undefined ? v : j;
   });
   return out;
 }

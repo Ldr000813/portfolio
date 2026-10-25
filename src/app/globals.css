@@ -71,12 +71,14 @@ header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.88);backdro
 /* decorative depth behind the mockup */
 .case .thumb:before{content:"";position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.16) 1px,transparent 1px);background-size:18px 18px;opacity:.55}
 .case .thumb:after{content:"";position:absolute;width:280px;height:280px;border-radius:50%;background:rgba(255,255,255,.2);filter:blur(64px);top:-50px;right:-40px;pointer-events:none}
-.case .thumb .feat-grid{position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr;gap:14px;width:100%;max-width:320px}
-.feat-tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;aspect-ratio:1/1;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22);border-radius:16px;backdrop-filter:blur(6px);transition:transform .25s ease,background .25s ease}
+.case .thumb .feat-grid{position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:330px}
+.feat-tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;padding:16px 10px;min-height:92px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22);border-radius:15px;backdrop-filter:blur(6px);transition:transform .25s ease,background .25s ease}
 .case:hover .feat-tile{transform:translateY(-3px);background:rgba(255,255,255,.16)}
-.feat-ic{width:34px;height:34px;color:#fff;opacity:.95}
+.feat-ic{width:30px;height:30px;color:#fff;opacity:.96}
 .feat-ic svg{width:100%;height:100%;display:block}
-.feat-cap{font-size:12px;font-weight:700;color:#fff;letter-spacing:.02em;text-align:center;padding:0 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.feat-cap{font-size:12px;font-weight:700;color:#fff;letter-spacing:.01em;text-align:center;line-height:1.3;white-space:nowrap}
+/* 奇数(5つ)のときは最後のタイルを中央に */
+.feat-grid.n5 .feat-tile:last-child{grid-column:1 / -1;max-width:calc(50% - 6px);justify-self:center}
 .case .body{padding:30px 32px}
 .case .tag{display:inline-block;font-size:11.5px;font-weight:800;letter-spacing:.08em;color:var(--accent);background:#EEF3FF;border-radius:999px;padding:4px 11px}
 .case h3{font-size:22px;font-weight:800;margin-top:12px}
