@@ -74,12 +74,7 @@ export const DEFAULT: Content = {
       ],
       stack: ["Next.js", "TypeScript", "Gemini API", "Vercel", "多言語"], image: "", accent: "emerald",
       url: "https://tonarikyoto.vercel.app", demoId: "", demoPw: "",
-      steps: [
-        { title: "トップで雰囲気を伝える", desc: "過去イベントの写真が流れるヒーローで、コミュニティの空気感を一目で。", image: "" },
-        { title: "イベントを見る・申し込む", desc: "日英対応のイベント一覧。締切を過ぎると自動で非表示に。", image: "" },
-        { title: "管理画面でノーコード更新", desc: "写真やイベントを運営メンバーが自分で更新。チラシ画像からAIが自動入力。", image: "" },
-        { title: "匿名の日程調整ツール", desc: "候補日に○△×で回答、URL共有で集計。登録不要・使い捨て。", image: "" },
-      ],
+      steps: [],
     },
   ],
   why: [
