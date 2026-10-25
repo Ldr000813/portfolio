@@ -5,7 +5,7 @@ type Dict = {
   brandCap: string;
   heroCtaConsult: string; heroCtaWorks: string;
   servicesTitle: string; servicesLead: string;
-  worksTitle: string; worksLead: string; viewSite: string; demoLogin: string;
+  worksTitle: string; worksLead: string; viewSite: string; demoLogin: string; caseDetail: string; walkthrough: string; backToWorks: string;
   whyTitle: string; whyLead: string;
   processTitle: string;
   pricingTitle: string; pricingLead: string; colContent: string; colAmt: string; colFor: string;
@@ -22,7 +22,7 @@ export const UI: Record<Lang, Dict> = {
     brandCap: "ごあいさつ・経歴はこちら →",
     heroCtaConsult: "まずは無料で相談", heroCtaWorks: "制作実績を見る →",
     servicesTitle: "できること", servicesLead: "「集客したい」「予約を受けたい」「この作業、毎回しんどい」。目的ベースで、必要なものだけ作ります。",
-    worksTitle: "制作実績", worksLead: "“作れます”ではなく、“実際に本番で動いています”。", viewSite: "サイトを見る", demoLogin: "デモ用ログイン",
+    worksTitle: "制作実績", worksLead: "“作れます”ではなく、“実際に本番で動いています”。", viewSite: "サイトを見る", demoLogin: "デモ用ログイン", caseDetail: "詳しく見る", walkthrough: "機能の流れ", backToWorks: "← 実績一覧へ",
     whyTitle: "選ばれる理由", whyLead: "大きな制作会社と、何もしないの“あいだ”にちょうどいい選択肢。",
     processTitle: "ご相談から公開まで",
     pricingTitle: "料金の目安", pricingLead: "内容によって変わります。まずは無料でご相談を。お見積りは無料です。", colContent: "内容", colAmt: "目安", colFor: "こんな方に",
@@ -36,7 +36,7 @@ export const UI: Record<Lang, Dict> = {
     brandCap: "About me & resume →",
     heroCtaConsult: "Get a free consultation", heroCtaWorks: "See my work →",
     servicesTitle: "What I do", servicesLead: "“Attract customers”, “take bookings”, “this task is painful every time”. I build only what you need, around your goal.",
-    worksTitle: "Selected work", worksLead: "Not just “I can build it” — it's actually live in production.", viewSite: "Visit site", demoLogin: "Demo login",
+    worksTitle: "Selected work", worksLead: "Not just “I can build it” — it's actually live in production.", viewSite: "Visit site", demoLogin: "Demo login", caseDetail: "View details", walkthrough: "How it works", backToWorks: "← Back to work",
     whyTitle: "Why me", whyLead: "The right middle ground between a big agency and doing nothing.",
     processTitle: "How we work",
     pricingTitle: "Pricing guide", pricingLead: "It depends on the scope. Let's talk first — quotes are free.", colContent: "What", colAmt: "From", colFor: "For whom",
@@ -50,7 +50,7 @@ export const UI: Record<Lang, Dict> = {
     brandCap: "个人简介・经历 →",
     heroCtaConsult: "先免费咨询", heroCtaWorks: "查看案例 →",
     servicesTitle: "服务内容", servicesLead: "“想吸引客流”“想接受预约”“这个工作每次都好累”。以目标为出发点，只做你真正需要的。",
-    worksTitle: "案例", worksLead: "不只是“我会做”，而是“已经在正式运行”。", viewSite: "查看网站", demoLogin: "演示登录",
+    worksTitle: "案例", worksLead: "不只是“我会做”，而是“已经在正式运行”。", viewSite: "查看网站", demoLogin: "演示登录", caseDetail: "查看详情", walkthrough: "功能流程", backToWorks: "← 返回案例",
     whyTitle: "为什么选择我", whyLead: "介于大型制作公司与什么都不做之间，刚刚好的选择。",
     processTitle: "从咨询到上线",
     pricingTitle: "价格参考", pricingLead: "依内容而定。欢迎先免费咨询，报价免费。", colContent: "内容", colAmt: "参考", colFor: "适合",

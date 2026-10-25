@@ -2,7 +2,8 @@ import { list, put } from "@vercel/blob";
 
 export type Metric = { n: string; l: string };
 export type Service = { icon: string; title: string; desc: string };
-export type Work = { tag: string; title: string; sub: string; points: string[]; stack: string[]; image: string; accent: "blue" | "emerald"; url: string; demoId: string; demoPw: string };
+export type WorkStep = { title: string; desc: string; image: string };
+export type Work = { tag: string; title: string; sub: string; points: string[]; stack: string[]; image: string; accent: "blue" | "emerald"; url: string; demoId: string; demoPw: string; steps: WorkStep[] };
 export type Why = { title: string; desc: string };
 export type Step = { title: string; desc: string };
 export type Price = { svc: string; amt: string; note: string };
@@ -56,6 +57,12 @@ export const DEFAULT: Content = {
       ],
       stack: ["Next.js", "TypeScript", "Supabase", "認証", "自動テスト"], image: "", accent: "blue",
       url: "https://stamp-app-two.vercel.app", demoId: "", demoPw: "",
+      steps: [
+        { title: "ワンタップで参加", desc: "Googleログインまたは匿名で、はじめてでもすぐに参加できます。", image: "" },
+        { title: "店舗をめぐってスタンプ", desc: "対象店舗でスタンプを集める。同時アクセスでも破綻しない整合性を担保。", image: "" },
+        { title: "特典を受け取る", desc: "規定数に達すると特典を自動付与。不正取得を防ぐ設計。", image: "" },
+        { title: "管理画面で運用", desc: "店舗・イベント・オーナー権限を一元管理。現場で使いやすい画面。", image: "" },
+      ],
     },
     {
       tag: "コミュニティ / Webサイト", title: "多文化コミュニティ「となり」公式サイト",
@@ -67,6 +74,12 @@ export const DEFAULT: Content = {
       ],
       stack: ["Next.js", "TypeScript", "Gemini API", "Vercel", "多言語"], image: "", accent: "emerald",
       url: "https://tonarikyoto.vercel.app", demoId: "", demoPw: "",
+      steps: [
+        { title: "トップで雰囲気を伝える", desc: "過去イベントの写真が流れるヒーローで、コミュニティの空気感を一目で。", image: "" },
+        { title: "イベントを見る・申し込む", desc: "日英対応のイベント一覧。締切を過ぎると自動で非表示に。", image: "" },
+        { title: "管理画面でノーコード更新", desc: "写真やイベントを運営メンバーが自分で更新。チラシ画像からAIが自動入力。", image: "" },
+        { title: "匿名の日程調整ツール", desc: "候補日に○△×で回答、URL共有で集計。登録不要・使い捨て。", image: "" },
+      ],
     },
   ],
   why: [
@@ -151,7 +164,10 @@ function overlayFromJa(c: Content, ja: Content): Content {
   out.services.forEach((s, i) => { if (ja.services[i]) s.icon = ja.services[i].icon; });
   out.works.forEach((w, i) => {
     const jw = ja.works[i];
-    if (jw) { w.image = jw.image; w.url = jw.url; w.demoId = jw.demoId; w.demoPw = jw.demoPw; w.stack = jw.stack; w.accent = jw.accent; }
+    if (jw) {
+      w.image = jw.image; w.url = jw.url; w.demoId = jw.demoId; w.demoPw = jw.demoPw; w.stack = jw.stack; w.accent = jw.accent;
+      (w.steps || []).forEach((s, k) => { if (jw.steps?.[k]) s.image = jw.steps[k].image; });
+    }
   });
   return out;
 }

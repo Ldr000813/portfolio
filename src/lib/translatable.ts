@@ -15,7 +15,11 @@ export function extract(src: Content) {
   clone.hero.metrics.forEach((m) => { add(m.n, (v) => (m.n = v)); add(m.l, (v) => (m.l = v)); });
   add(clone.strip, (v) => (clone.strip = v));
   clone.services.forEach((s) => { add(s.title, (v) => (s.title = v)); add(s.desc, (v) => (s.desc = v)); });
-  clone.works.forEach((w) => { add(w.tag, (v) => (w.tag = v)); add(w.title, (v) => (w.title = v)); add(w.sub, (v) => (w.sub = v)); w.points.forEach((p, i) => add(p, (v) => (w.points[i] = v))); });
+  clone.works.forEach((w) => {
+    add(w.tag, (v) => (w.tag = v)); add(w.title, (v) => (w.title = v)); add(w.sub, (v) => (w.sub = v));
+    w.points.forEach((p, i) => add(p, (v) => (w.points[i] = v)));
+    (w.steps || []).forEach((s) => { add(s.title, (v) => (s.title = v)); add(s.desc, (v) => (s.desc = v)); });
+  });
   clone.why.forEach((x) => { add(x.title, (v) => (x.title = v)); add(x.desc, (v) => (x.desc = v)); });
   clone.process.forEach((x) => { add(x.title, (v) => (x.title = v)); add(x.desc, (v) => (x.desc = v)); });
   clone.pricing.forEach((x) => { add(x.svc, (v) => (x.svc = v)); add(x.amt, (v) => (x.amt = v)); add(x.note, (v) => (x.note = v)); });

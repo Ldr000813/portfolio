@@ -145,6 +145,22 @@ export default function Admin() {
     else setMsg("QR画像のアップロードに失敗しました。");
   }
 
+  function editStep(wi: number, si: number, patch: any) {
+    setC((p) => { if (!p) return p; const works = [...p.works]; const steps = [...(works[wi].steps || [])]; steps[si] = { ...steps[si], ...patch }; works[wi] = { ...works[wi], steps }; return { ...p, works }; });
+  }
+  function addStep(wi: number) {
+    setC((p) => { if (!p) return p; const works = [...p.works]; works[wi] = { ...works[wi], steps: [...(works[wi].steps || []), { title: "", desc: "", image: "" }] }; return { ...p, works }; });
+  }
+  function delStep(wi: number, si: number) {
+    setC((p) => { if (!p) return p; const works = [...p.works]; works[wi] = { ...works[wi], steps: (works[wi].steps || []).filter((_, k) => k !== si) }; return { ...p, works }; });
+  }
+  async function uploadStepImg(wi: number, si: number, file: File) {
+    const f = await prepareImage(file, 1000);
+    const fd = new FormData(); fd.append("file", f);
+    const r = await fetch("/api/admin/upload", { method: "POST", headers: { "x-admin-password": pw }, body: fd });
+    if (r.ok) editStep(wi, si, { image: (await r.json()).url });
+    else setMsg("画像アップロードに失敗しました。");
+  }
   async function uploadWorkImg(i: number, file: File) {
     const f = await prepareImage(file);
     const fd = new FormData(); fd.append("file", f);
@@ -299,6 +315,26 @@ export default function Admin() {
               <Fld label="デモ用 パスワード（任意）"><input className="in" value={w.demoPw || ""} onChange={(e) => editItem("works", i, { demoPw: e.target.value })} /></Fld>
             </div>
             <p style={{ fontSize: 11, color: "#8893A7", marginTop: -6 }}>※ ID/PWは公開ページにそのまま表示されます。閲覧用のデモアカウントのみ入力してください（本番の認証情報は入れない）。</p>
+
+            <div style={{ borderTop: "1px solid #eee", marginTop: 12, paddingTop: 10 }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "#51607A", marginBottom: 6 }}>機能の流れ（詳細ページのステップ）</div>
+              {(w.steps || []).map((s, si) => (
+                <div className="item" key={si}>
+                  <div className="rowbtns" style={{ marginBottom: 6 }}>
+                    <strong style={{ flex: 1 }}>ステップ {si + 1}</strong>
+                    <button className="linkbtn del" onClick={() => delStep(i, si)}>削除</button>
+                  </div>
+                  <input className="in" placeholder="タイトル（例: ワンタップで参加）" value={s.title} onChange={(e) => editStep(i, si, { title: e.target.value })} />
+                  <textarea className="in" rows={2} style={{ marginTop: 6 }} placeholder="説明" value={s.desc} onChange={(e) => editStep(i, si, { desc: e.target.value })} />
+                  <div className="rowbtns" style={{ marginTop: 6 }}>
+                    {s.image && <img src={s.image} alt="" style={{ width: 80, height: 52, objectFit: "cover", borderRadius: 6, border: "1px solid #E6EAF1" }} />}
+                    <input type="file" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadStepImg(i, si, f); e.currentTarget.value = ""; }} />
+                    {s.image && <button className="linkbtn del" onClick={() => editStep(i, si, { image: "" })}>画像を外す</button>}
+                  </div>
+                </div>
+              ))}
+              <button className="linkbtn" onClick={() => addStep(i)}>＋ ステップを追加</button>
+            </div>
             <div className="fld"><span>画像（任意。未設定ならポイントを表示）</span>
               <div className="rowbtns">
                 {w.image && <img src={w.image} alt="" style={{ width: 90, height: 60, objectFit: "cover", borderRadius: 8, border: "1px solid #E6EAF1" }} />}
