@@ -45,7 +45,27 @@ export default async function Home() {
         {c.works.map((w, i) => (
           <div className={"case " + w.accent} key={i}>
             <div className="thumb">
-              {w.image ? <img src={w.image} alt="" /> : <div className="mock">{w.points.map((p) => "◎ " + p.replace(/。.*$/, "")).join("\n")}</div>}
+              {w.image ? <img src={w.image} alt="" /> : (
+                <div className="mockup">
+                  <div className="mk-win">
+                    <div className="mk-bar"><span /><span /><span />
+                      <div className="mk-url">{w.url ? w.url.replace(/^https?:\/\//, "") : w.tag}</div>
+                    </div>
+                    <div className="mk-body">
+                      <div className="mk-title">{w.title}</div>
+                      <div className="mk-chips">{w.stack.slice(0, 3).map((s, j) => <i key={j}>{s}</i>)}</div>
+                      <div className="mk-rows">
+                        {w.points.slice(0, 3).map((p, j) => (
+                          <div className="mk-row" key={j}>
+                            <span className="mk-ck">✓</span>
+                            <span className="mk-txt">{p.replace(/（.*$/, "").replace(/。.*$/, "")}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
             <div className="body">
               <span className="tag">{w.tag}</span>
