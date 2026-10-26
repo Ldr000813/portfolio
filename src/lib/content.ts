@@ -1,4 +1,7 @@
 import { list, put } from "@vercel/blob";
+import { unstable_cache, revalidateTag } from "next/cache";
+
+const CONTENT_TAG = "portfolio-content";
 
 export type Metric = { n: string; l: string };
 export type Service = { icon: string; title: string; desc: string };
@@ -209,7 +212,9 @@ function overlayFromJa(c: Content, ja: Content): Content {
   return out;
 }
 
-export async function getContent(lang: Lang = "ja"): Promise<Content> {
+// Blobからの読み取り（list / fetch）はここだけ。これを unstable_cache で包み、
+// revalidate:false にすることで、管理者が保存するまで再取得しない＝Blobリクエストを最小化。
+async function loadContent(lang: Lang): Promise<Content> {
   try {
     const jaRaw = (await readAt(pathFor("ja"))) || (await readAt("portfolio/content.json"));
     const ja: Content = jaRaw ? { ...DEFAULT, ...jaRaw } : DEFAULT;
@@ -222,6 +227,17 @@ export async function getContent(lang: Lang = "ja"): Promise<Content> {
   }
 }
 
+export async function getContent(lang: Lang = "ja"): Promise<Content> {
+  const cached = unstable_cache(
+    () => loadContent(lang),
+    ["portfolio-content", lang],
+    { tags: [CONTENT_TAG], revalidate: false }
+  );
+  return cached();
+}
+
 export async function saveContent(lang: Lang, c: Content): Promise<void> {
   await put(pathFor(lang), JSON.stringify(c), { access: "public", contentType: "application/json", addRandomSuffix: false });
+  // 保存したらキャッシュを無効化し、次回アクセス時に一度だけ再取得させる。
+  revalidateTag(CONTENT_TAG);
 }
