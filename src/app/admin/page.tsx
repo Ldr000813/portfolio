@@ -11,6 +11,39 @@ function Fld({ label, children }: { label: string; children: React.ReactNode }) 
   return <label className="fld"><span>{label}</span>{children}</label>;
 }
 
+// 背景画像の「どの部分を表示するか」をクリック／ドラッグで調整するピッカー。
+// プレビューは実際のカード左側に近い縦長比率で、object-position をそのまま反映する。
+function FocalPicker({ url, pos, onChange }: { url: string; pos: string; onChange: (p: string) => void }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const m = /(-?\d+(?:\.\d+)?)%\s+(-?\d+(?:\.\d+)?)%/.exec(pos || "");
+  const px = m ? Number(m[1]) : 50;
+  const py = m ? Number(m[2]) : 50;
+  const clamp = (n: number) => Math.max(0, Math.min(100, Math.round(n)));
+  function setFromEvent(clientX: number, clientY: number) {
+    const el = ref.current; if (!el) return;
+    const r = el.getBoundingClientRect();
+    onChange(`${clamp(((clientX - r.left) / r.width) * 100)}% ${clamp(((clientY - r.top) / r.height) * 100)}%`);
+  }
+  return (
+    <div style={{ marginTop: 10 }}>
+      <div
+        ref={ref}
+        onClick={(e) => setFromEvent(e.clientX, e.clientY)}
+        onMouseMove={(e) => { if (e.buttons === 1) setFromEvent(e.clientX, e.clientY); }}
+        style={{ position: "relative", width: "100%", maxWidth: 300, aspectRatio: "4 / 5", borderRadius: 10, overflow: "hidden", border: "1px solid #E6EAF1", cursor: "crosshair", userSelect: "none" }}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={url} alt="" draggable={false} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: `${px}% ${py}%` }} />
+        <div style={{ position: "absolute", left: `${px}%`, top: `${py}%`, transform: "translate(-50%,-50%)", width: 22, height: 22, borderRadius: "50%", border: "2px solid #fff", boxShadow: "0 0 0 2px rgba(29,78,216,.9), 0 1px 4px rgba(0,0,0,.4)", pointerEvents: "none" }} />
+      </div>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 6 }}>
+        <small style={{ color: "#8893A7" }}>画像をクリック／ドラッグで表示位置を調整（{px}% {py}%）</small>
+        <button className="linkbtn" type="button" onClick={() => onChange("50% 50%")}>中央に戻す</button>
+      </div>
+    </div>
+  );
+}
+
 export default function Admin() {
   type Lang = "ja" | "zh" | "en";
   const LANGNAME: Record<Lang, string> = { ja: "日本語", zh: "中文", en: "English" };
@@ -363,16 +396,18 @@ export default function Admin() {
               ))}
               <button className="linkbtn" onClick={() => addStep(i)}>＋ ステップを追加</button>
             </div>
-            <div className="fld"><span>画像（任意。未設定ならポイントを表示）</span>
+            <div className="fld"><span>左側の背景画像（任意。設定するとアイコンの代わりに表示）</span>
               <div className="rowbtns">
-                {w.image && <img src={w.image} alt="" style={{ width: 90, height: 60, objectFit: "cover", borderRadius: 8, border: "1px solid #E6EAF1" }} />}
                 <input type="file" accept="image/*" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadWorkImg(i, f); e.currentTarget.value = ""; }} />
                 {w.image && <button className="linkbtn del" onClick={() => editItem("works", i, { image: "" })}>画像を外す</button>}
               </div>
+              {w.image && (
+                <FocalPicker url={w.image} pos={w.imagePos || "50% 50%"} onChange={(p) => editItem("works", i, { imagePos: p })} />
+              )}
             </div>
           </div>
         ))}
-        <button className="linkbtn" onClick={() => addItem("works", { tag: "", title: "", sub: "", points: [], stack: [], features: [], image: "", accent: "blue", url: "", demoId: "", demoPw: "", steps: [] })}>＋ 実績を追加</button>
+        <button className="linkbtn" onClick={() => addItem("works", { tag: "", title: "", sub: "", points: [], stack: [], features: [], image: "", imagePos: "50% 50%", accent: "blue", url: "", demoId: "", demoPw: "", steps: [] })}>＋ 実績を追加</button>
       </div>
 
       <div className="block">

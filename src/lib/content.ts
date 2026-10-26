@@ -7,7 +7,7 @@ export type Metric = { n: string; l: string };
 export type Service = { icon: string; title: string; desc: string };
 export type WorkStep = { title: string; desc: string; image: string };
 export type Feature = { icon: string; label: string };
-export type Work = { tag: string; title: string; sub: string; points: string[]; stack: string[]; features: Feature[]; image: string; accent: "blue" | "emerald"; url: string; demoId: string; demoPw: string; steps: WorkStep[] };
+export type Work = { tag: string; title: string; sub: string; points: string[]; stack: string[]; features: Feature[]; image: string; imagePos: string; accent: "blue" | "emerald"; url: string; demoId: string; demoPw: string; steps: WorkStep[] };
 export type Why = { title: string; desc: string };
 export type Step = { title: string; desc: string };
 export type Price = { svc: string; amt: string; note: string };
@@ -68,7 +68,7 @@ export const DEFAULT: Content = {
         { icon: "dashboard", label: "店舗管理画面" },
         { icon: "bolt", label: "即時スタンプ付与" },
       ],
-      image: "", accent: "blue",
+      image: "", imagePos: "50% 50%", accent: "blue",
       url: "https://stamp-app-two.vercel.app", demoId: "", demoPw: "",
       steps: [
         { title: "ワンタップで参加", desc: "Googleログインまたは匿名で、はじめてでもすぐに参加できます。", image: "" },
@@ -94,7 +94,7 @@ export const DEFAULT: Content = {
         { icon: "image", label: "写真ギャラリー管理" },
         { icon: "users", label: "匿名で参加OK" },
       ],
-      image: "", accent: "emerald",
+      image: "", imagePos: "50% 50%", accent: "emerald",
       url: "https://tonarikyoto.vercel.app", demoId: "", demoPw: "",
       steps: [],
     },
@@ -198,7 +198,7 @@ function overlayFromJa(c: Content, ja: Content): Content {
       const tf = (t.features || [])[k] || jf;
       return { ...tf, icon: jf.icon };
     });
-    return { ...t, image: jw.image, url: jw.url, demoId: jw.demoId, demoPw: jw.demoPw, stack: jw.stack, accent: jw.accent, steps, features };
+    return { ...t, image: jw.image, imagePos: jw.imagePos, url: jw.url, demoId: jw.demoId, demoPw: jw.demoPw, stack: jw.stack, accent: jw.accent, steps, features };
   });
   out.why = ja.why.map((j, i) => (c.why || [])[i] || j);
   out.process = ja.process.map((j, i) => (c.process || [])[i] || j);

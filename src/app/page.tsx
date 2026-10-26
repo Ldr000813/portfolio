@@ -47,7 +47,7 @@ export default async function Home() {
         {c.works.map((w, i) => (
           <div className={"case " + w.accent} key={i}>
             <div className="thumb">
-              {w.image ? <img src={w.image} alt="" /> : (
+              {w.image ? <img src={w.image} alt="" style={{ objectPosition: w.imagePos || "50% 50%" }} /> : (
                 <div className={"feat-grid n" + Math.min((w.features || []).length, 6)}>
                   {(w.features || []).slice(0, 6).map((f, j) => (
                     <div className="feat-tile" key={j}>
